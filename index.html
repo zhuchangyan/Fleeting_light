@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  散射体设计台 · Scatterer Design Bench
+  流光 · Fleeting Light
   一台可玩的混沌重建式光谱仪 —— 摆放散射体，塑造光子的 dwell-time 分布。
   A playable chaotic reconstructive spectrometer: place scatterers, shape the
   photons' dwell-time distribution.
@@ -15,17 +15,17 @@
     "Resolution and Robustness Bounds for Reconstructive Spectrometers,"
     Phys. Rev. Lett. 137, 123802 (2026).  doi:10.1103/yffp-wgsh
 
-  Source & citable archive: https://github.com/<user>/scatterer-design-bench
+  Source & citable archive: https://github.com/<user>/fleeting-light
   Live: https://www.changyanzhu.com
 -->
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="摆放散射体，让光子在每一个时间窗都有到达 —— 一台可玩的混沌光谱仪。规则全部来自计算，不是调手感调出来的。">
+<meta name="description" content="流光 —— 一台可玩的混沌光谱仪。摆放散射体，让光子在每一个时间窗都有到达；规则全部来自计算，不是调手感调出来的。">
 <meta name="color-scheme" content="dark">
-<meta property="og:title" content="散射体设计台 · Scatterer Design Bench">
-<meta property="og:description" content="Place scatterers so photons arrive in every time window — a playable chaotic spectrometer whose rules all come from calculations, not from game balance.">
+<meta property="og:title" content="流光 · Fleeting Light">
+<meta property="og:description" content="Fleeting Light — place scatterers so photons arrive in every time window — a playable chaotic spectrometer whose rules all come from calculations, not from game balance.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.changyanzhu.com/">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%94%AC</text></svg>">
@@ -35,7 +35,7 @@
   img{max-width:100%}
   [hidden]{display:none!important}
 </style>
-<title>散射体设计台</title>
+<title>流光 Fleeting Light</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -53,6 +53,8 @@
   .wrap{max-width:1200px;margin:0 auto;padding:28px 20px 50px;display:flex;flex-direction:column;gap:14px}
 
   header{display:flex;flex-direction:column;gap:6px}
+  .subtitle{font-family:var(--f-m);font-size:13px;color:var(--ink-3);
+            letter-spacing:.02em;white-space:nowrap}
   .eyebrow{font-family:var(--f-m);font-size:11px;font-weight:500;letter-spacing:.17em;
            text-transform:uppercase;color:var(--ink-3)}
   h1{margin:0;font-size:clamp(26px,4.4vw,36px);font-weight:600;letter-spacing:-.015em;line-height:1.1}
@@ -182,7 +184,7 @@
 <div class="wrap">
   <header>
     <div class="eyebrow" data-i18n="eyebrow"></div>
-    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><h1 data-i18n="title"></h1><button type="button" id="bLang" style="padding:6px 12px">EN</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><h1 data-i18n="title"></h1><span class="subtitle" data-i18n="subtitle"></span></div><button type="button" id="bLang" style="padding:6px 12px">EN</button></div>
     <p class="intro" data-i18n-html="intro"></p>
   </header>
 
@@ -311,7 +313,8 @@
   try{ var _l=localStorage.getItem("lang"); if(_l==="en"||_l==="zh") LANG=_l; }catch(e){}
   var I18N={
    zh:{
-    docTitle:"散射体设计台",
+    docTitle:"流光 · 混沌光谱仪",
+    subtitle:"一台可玩的混沌光谱仪",
     aTitle:"这个游戏在模拟什么",
     aLead:"一句话：你是在用散射体的摆位，手动塑造光子的 dwell time 分布。",
     a1h:"分辨率藏在光程里",
@@ -330,7 +333,7 @@
     aContact:'如果你对这个项目感兴趣，欢迎来信：<a href="mailto:changyan.zhu@ntu.edu.sg">changyan.zhu@ntu.edu.sg</a>',
     aCopy:'© 2026 Changyan Zhu · 保留所有权利 · 以 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noopener">CC BY-NC-ND 4.0</a> 授权（署名 · 禁商用 · 禁改编），商用请来信洽谈。',
     intro:"摆放散射体，让光子在<b>每一个时间窗</b>都有到达 —— 探测器每一层对应一个时间窗，全部覆盖才算胜利。",
-    congrats:"恭喜通关！", congratsSub:"所有时间窗都有光子抵达", eyebrow:"重建式光谱仪 · 逆向设计", title:"散射体设计台",
+    congrats:"恭喜通关！", congratsSub:"所有时间窗都有光子抵达", eyebrow:"重建式光谱仪 · 逆向设计", title:"流光",
     fire:"发射", refire:"重新发射", firing:"发射中…", pause:"暂停", play:"播放",
     blind:"盲设计", peek:"预览光路",
     speed:"速度", aperture:"入射孔径",
@@ -355,7 +358,8 @@
     lvName:"{n} 光子",
    },
    en:{
-    docTitle:"Scatterer Design Bench",
+    docTitle:"Fleeting Light · A Chaotic Spectrometer",
+    subtitle:"a playable chaotic spectrometer",
     aTitle:"What this game is simulating",
     aLead:"In one line: by placing scatterers, you are shaping the photons\u2019 dwell-time distribution by hand.",
     a1h:"Resolution lives in the path length",
@@ -374,7 +378,7 @@
     aContact:'If this project interests you, write to me: <a href="mailto:changyan.zhu@ntu.edu.sg">changyan.zhu@ntu.edu.sg</a>',
     aCopy:'© 2026 Changyan Zhu · All rights reserved · Released under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noopener">CC BY-NC-ND 4.0</a> (attribution · non-commercial · no derivatives). Write for commercial licensing.',
     intro:"Place scatterers so that photons arrive in <b>every time window</b> — each detector layer is one window, and you win only when all of them are covered.",
-    congrats:"CONGRATULATIONS!", congratsSub:"Every time window covered", eyebrow:"Reconstructive Spectrometer · Inverse Design", title:"Scatterer Design Bench",
+    congrats:"CONGRATULATIONS!", congratsSub:"Every time window covered", eyebrow:"Reconstructive Spectrometer · Inverse Design", title:"Fleeting Light",
     fire:"FIRE", refire:"FIRE AGAIN", firing:"FIRING…", pause:"Pause", play:"Play",
     blind:"Blind design", peek:"Preview paths",
     speed:"Speed", aperture:"Input NA",

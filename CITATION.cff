@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: >-
   If you use or refer to this game, please cite both the software (below) and
   the paper its model is derived from (see `preferred-citation`).
-title: "Scatterer Design Bench: a playable chaotic reconstructive spectrometer"
+title: "Fleeting Light (流光): a playable chaotic reconstructive spectrometer"
 abstract: >-
   A browser game in which the player places circular scatterers inside a leaky
   rectangular cavity to shape the dwell-time distribution of a handful of
@@ -26,7 +26,7 @@ version: "1.0.0"
 date-released: "2026-09-24"
 license: CC-BY-NC-ND-4.0
 url: "https://www.changyanzhu.com"
-repository-code: "https://github.com/CHANGE-ME/scatterer-design-bench"
+repository-code: "https://github.com/CHANGE-ME/fleeting-light"
 keywords:
   - reconstructive spectrometer
   - computational spectrometer

@@ -1,6 +1,14 @@
-# Scatterer Design Bench · 散射体设计台
+# 流光 · Fleeting Light
 
 A playable chaotic reconstructive spectrometer, in one HTML file.
+
+> 流光容易把人抛。
+>
+> *Fleeting light casts us aside so easily.* — Jiang Jie, 13th c.
+
+In Chinese, 流光 fuses light and time into a single word. That is not a
+metaphor here: what this game asks you to shape is literally the distribution
+of light over time.
 
 **Play it: [www.changyanzhu.com](https://www.changyanzhu.com)** — or clone this
 repository and open `index.html`. No build step, no dependencies, no server.
@@ -116,6 +124,9 @@ Commercial licensing, classroom packages and bespoke versions:
 ## 中文简介
 
 一台可以玩的混沌重建式光谱仪，全部装在一个 HTML 文件里。
+
+名字取自「流光容易把人抛」。中文把光和时间揉进了同一个词里，而这个游戏要你
+亲手塑造的，恰好就是光在时间上的分布 —— 这一次不是比喻。
 
 你在一个会漏光的矩形腔里摆放圆形散射体，让光子从左壁射入、整面右壁作为探测器。
 目标不是让更多的光出来，而是让光**在时间上尽量散开** —— 这就是重建式光谱仪的
