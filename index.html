@@ -23,7 +23,8 @@
   transmittance.  For how such a spectrometer should actually be optimally
   designed, the paper is the authority, not this game.
 
-  Source & citable archive: https://github.com/zhuchangyan/Fleeting_light
+  Source: https://github.com/zhuchangyan/Fleeting_light
+  Citable archive: https://doi.org/10.5281/zenodo.22939476  (concept DOI, always latest)
   Live: https://www.changyanzhu.com
 -->
 <html lang="zh-CN">
@@ -182,6 +183,7 @@
   .acontact .cite{padding-left:13px;border-left:2px solid var(--wall)}
   .acontact .cite .t{color:var(--ink);font-style:italic}
   .acontact .cite p:last-child{margin-bottom:0}
+  .acontact .arch{font-family:var(--f-m);font-size:12.5px;color:var(--ink-3)}
   .acontact .copy{margin:0;font-family:var(--f-m);font-size:12px;
                   letter-spacing:.04em;color:var(--ink-3,#6e6a63)}
   .asec sup{font-size:.72em}
@@ -311,6 +313,7 @@
         <p data-i18n-html="aScope"></p>
       </div>
       <p data-i18n-html="aContact"></p>
+      <p class="arch" data-i18n-html="aArchive"></p>
       <p class="copy" data-i18n-html="aCopy"></p>
     </footer>
   </article>
@@ -344,6 +347,7 @@
     aPaper:'这个游戏的灵感来自我们的论文 <a class="t" href="https://doi.org/10.1103/yffp-wgsh" target="_blank" rel="noopener">Resolution and Robustness Bounds for Reconstructive Spectrometers</a> —— C. Zhu, H. Lo, J. Yu, Q. J. Wang, Y. D. Chong, <i>Phys. Rev. Lett.</i> <b>137</b>, 123802 (2026)（<a href="https://arxiv.org/abs/2512.20415" target="_blank" rel="noopener">arXiv:2512.20415</a>）。',
     aScope:'但边界要说清楚：这个游戏用到的理论只有谱关联函数 <b>C(Δν) = |FT{p(t)}|²</b> 这一层，它演示的是逆向设计如何改变<strong>光程差的分布</strong>，并没有实现论文真正的机制。论文处理的是更完整的问题 —— 重建误差由 Fisher 信息支配，其下界 <b>Tr[G⁺]</b> 可以分解成谱关联长度与平均透过率两部分，而这两者之间存在取舍。<strong>重建式光谱仪究竟该如何最优地设计，以论文为准；这个游戏只是它启发出来的一个直观侧面。</strong>',
     aContact:'如果你对这个项目感兴趣，欢迎来信：<a href="mailto:changyan.zhu@ntu.edu.sg">changyan.zhu@ntu.edu.sg</a>',
+    aArchive:'源码与可引用存档：<a href="https://github.com/zhuchangyan/Fleeting_light" target="_blank" rel="noopener">GitHub</a> · <a href="https://doi.org/10.5281/zenodo.22939476" target="_blank" rel="noopener">doi:10.5281/zenodo.22939476</a>',
     aCopy:'© 2026 Changyan Zhu · 保留所有权利 · 以 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noopener">CC BY-NC-ND 4.0</a> 授权（署名 · 禁商用 · 禁改编），商用请来信洽谈。',
     intro:"摆放散射体，让光子在<b>每一个时间窗</b>都有到达 —— 探测器每一层对应一个时间窗，全部覆盖才算胜利。",
     congrats:"恭喜通关！", congratsSub:"所有时间窗都有光子抵达", eyebrow:"重建式光谱仪 · 逆向设计", title:"流光",
@@ -390,6 +394,7 @@
     aPaper:'This game was inspired by our paper <a class="t" href="https://doi.org/10.1103/yffp-wgsh" target="_blank" rel="noopener">Resolution and Robustness Bounds for Reconstructive Spectrometers</a> — C. Zhu, H. Lo, J. Yu, Q. J. Wang, Y. D. Chong, <i>Phys. Rev. Lett.</i> <b>137</b>, 123802 (2026) (<a href="https://arxiv.org/abs/2512.20415" target="_blank" rel="noopener">arXiv:2512.20415</a>).',
     aScope:'The boundary is worth stating plainly. The only theory this game uses is the spectral correlation <b>C(Δν) = |FT{p(t)}|²</b>, and what it demonstrates is how inverse design reshapes the <strong>distribution of optical path lengths</strong>. It does not implement the machinery of the paper, where the reconstruction error is governed by the Fisher information and its bound <b>Tr[G⁺]</b> decomposes into a spectral correlation length and a mean transmittance, two quantities that trade off against each other. <strong>For how a reconstructive spectrometer should actually be optimally designed, the paper is the authority; this game is one intuitive facet it inspired.</strong>',
     aContact:'If this project interests you, write to me: <a href="mailto:changyan.zhu@ntu.edu.sg">changyan.zhu@ntu.edu.sg</a>',
+    aArchive:'Source and citable archive: <a href="https://github.com/zhuchangyan/Fleeting_light" target="_blank" rel="noopener">GitHub</a> · <a href="https://doi.org/10.5281/zenodo.22939476" target="_blank" rel="noopener">doi:10.5281/zenodo.22939476</a>',
     aCopy:'© 2026 Changyan Zhu · All rights reserved · Released under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noopener">CC BY-NC-ND 4.0</a> (attribution · non-commercial · no derivatives). Write for commercial licensing.',
     intro:"Place scatterers so that photons arrive in <b>every time window</b> — each detector layer is one window, and you win only when all of them are covered.",
     congrats:"CONGRATULATIONS!", congratsSub:"Every time window covered", eyebrow:"Reconstructive Spectrometer · Inverse Design", title:"Fleeting Light",

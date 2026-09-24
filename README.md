@@ -1,5 +1,8 @@
 # 流光 · Fleeting Light
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22939476.svg)](https://doi.org/10.5281/zenodo.22939476)
+[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-a0522d.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
 A playable chaotic reconstructive spectrometer, in one HTML file.
 
 > 流光容易把人抛。
@@ -119,9 +122,14 @@ python3 tools/validate.py index.html
 
 ## Citation
 
-If you use or refer to this game, please cite the software itself. The paper
-that inspired it — and which remains the reference for the underlying theory —
-is:
+If you use or refer to this game, please cite the software itself:
+
+> C. Zhu, *Fleeting Light (流光): a playable chaotic reconstructive
+> spectrometer*, Zenodo (2026).
+> [doi:10.5281/zenodo.22939476](https://doi.org/10.5281/zenodo.22939476)
+
+The paper that inspired it — and which remains the reference for the
+underlying theory of reconstructive-spectrometer design — is:
 
 > C. Zhu, H. Lo, J. Yu, Q. J. Wang, and Y. D. Chong,
 > *Resolution and Robustness Bounds for Reconstructive Spectrometers*,

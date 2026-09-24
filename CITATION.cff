@@ -26,10 +26,14 @@ authors:
     email: changyan.zhu@ntu.edu.sg
     affiliation: "Nanyang Technological University, Singapore"
     orcid: "https://orcid.org/0000-0002-2826-8426"
-version: "1.0.0"
+version: "1.0.1"
 date-released: "2026-09-24"
 license: CC-BY-NC-ND-4.0
 url: "https://www.changyanzhu.com"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.22939476"
+    description: "Concept DOI — always resolves to the latest version"
 repository-code: "https://github.com/zhuchangyan/Fleeting_light"
 keywords:
   - reconstructive spectrometer
