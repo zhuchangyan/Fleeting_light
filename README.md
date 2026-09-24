@@ -76,6 +76,26 @@ Symmetry collapses many optical paths onto the same length. `p(t)` falls into a
 few spikes, the spread is gone, and most detector channels receive nothing at
 all. Chaos is not a side effect of this scheme; **it is the working principle.**
 
+## What this game does *not* do
+
+It is worth being precise about the boundary, because it is easy to overclaim.
+
+The only theory in here is the spectral correlation `C(Δν) = |FT{p(t)}|²`. What
+the game demonstrates is one thing: **how inverse design reshapes the
+distribution of optical path lengths.** That is a real and central mechanism,
+but it is not the whole story, and the game is not a design tool.
+
+The paper below, which inspired the game, treats the fuller problem: the
+reconstruction error is governed by the Fisher information, and its bound
+`Tr[G⁺]` decomposes into a spectral correlation length and a mean
+transmittance — two quantities that trade off against each other, and that
+together decide when super-resolution below the correlation-length limit is
+achievable. None of that machinery is implemented here.
+
+So: **for how a reconstructive spectrometer should actually be optimally
+designed, the paper is the authority. This game is one intuitive facet it
+inspired.**
+
 ## Repository layout
 
 ```
@@ -99,8 +119,9 @@ python3 tools/validate.py index.html
 
 ## Citation
 
-If you use or refer to this game, please cite the software and the paper its
-model is derived from:
+If you use or refer to this game, please cite the software itself. The paper
+that inspired it — and which remains the reference for the underlying theory —
+is:
 
 > C. Zhu, H. Lo, J. Yu, Q. J. Wang, and Y. D. Chong,
 > *Resolution and Robustness Bounds for Reconstructive Spectrometers*,
@@ -141,6 +162,12 @@ Commercial licensing, classroom packages and bespoke versions:
 值得自己去撞一次的地方：点「整齐阵列」。它看起来专业、对称、一丝不苟，却几乎
 总是输给随手摆的一堆乱圆 —— 对称让大量光路退化成相同的长度，`p(t)` 塌成几根
 尖峰。混沌不是这个方案的副作用，它就是工作原理本身。
+
+边界也要说清楚：这里用到的理论只有谱关联函数 `C(Δν) = |FT{p(t)}|²`，演示的是
+逆向设计如何改变**光程差的分布**，并没有实现论文真正的机制 —— 重建误差由 Fisher
+信息支配，其下界 `Tr[G⁺]` 可以分解成谱关联长度与平均透过率两部分，二者之间存在
+取舍。**重建式光谱仪究竟该如何最优地设计，以论文为准；这个游戏只是它启发出来的
+一个直观侧面。**
 
 版权归 Changyan Zhu 所有，以 CC BY-NC-ND 4.0 授权：可以署名转载，禁止商用和
 改编。商业授权、课堂使用、定制版本请来信 **changyan.zhu@ntu.edu.sg**。

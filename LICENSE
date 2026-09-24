@@ -27,7 +27,7 @@ You MAY NOT, without prior written permission:
   - use the work, or any part of it, for commercial purposes;
   - distribute modified versions, translations, ports, or derivative games;
   - remove or obscure the copyright notices or the attribution to the paper
-    the model is derived from.
+    that inspired the work.
 
 Attribution should read, at minimum:
 
@@ -51,7 +51,10 @@ of representing dwell-time statistics as a game. Those are free for anyone to
 build on, and an independent implementation of the same concept does not
 infringe this licence.
 
-The scientific results the model is built on are published separately:
+This game is not a substitute for the science that inspired it. It uses only
+the spectral correlation C(dnu) = |FT{p(t)}|^2, and demonstrates how inverse
+design reshapes the distribution of optical path lengths. The work that
+inspired it is published separately:
 
     C. Zhu, H. Lo, J. Yu, Q. J. Wang, and Y. D. Chong,
     "Resolution and Robustness Bounds for Reconstructive Spectrometers,"

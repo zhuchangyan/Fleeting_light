@@ -10,10 +10,18 @@
   Share it with attribution; no commercial use and no derivative works without
   written permission.  For commercial licensing, write to the address above.
 
-  Inspired by, and with its rules derived from:
+  Inspired by:
     C. Zhu, H. Lo, J. Yu, Q. J. Wang, and Y. D. Chong,
     "Resolution and Robustness Bounds for Reconstructive Spectrometers,"
     Phys. Rev. Lett. 137, 123802 (2026).  doi:10.1103/yffp-wgsh
+
+  Scope: this game uses only the spectral correlation C(dnu) = |FT{p(t)}|^2,
+  and demonstrates how inverse design reshapes the distribution of optical
+  path lengths.  It does not implement the machinery of the paper, where the
+  reconstruction error is governed by the Fisher information and its bound
+  Tr[G+] decomposes into a spectral correlation length and a mean
+  transmittance.  For how such a spectrometer should actually be optimally
+  designed, the paper is the authority, not this game.
 
   Source & citable archive: https://github.com/zhuchangyan/Fleeting_light
   Live: https://www.changyanzhu.com
@@ -173,6 +181,7 @@
   .acontact a:hover{color:var(--ink)}
   .acontact .cite{padding-left:13px;border-left:2px solid var(--wall)}
   .acontact .cite .t{color:var(--ink);font-style:italic}
+  .acontact .cite p:last-child{margin-bottom:0}
   .acontact .copy{margin:0;font-family:var(--f-m);font-size:12px;
                   letter-spacing:.04em;color:var(--ink-3,#6e6a63)}
   .asec sup{font-size:.72em}
@@ -297,7 +306,10 @@
       <p data-i18n-html="a4p2"></p>
     </section>
     <footer class="acontact">
-      <p class="cite" data-i18n-html="aPaper"></p>
+      <div class="cite">
+        <p data-i18n-html="aPaper"></p>
+        <p data-i18n-html="aScope"></p>
+      </div>
       <p data-i18n-html="aContact"></p>
       <p class="copy" data-i18n-html="aCopy"></p>
     </footer>
@@ -329,7 +341,8 @@
     a4h:"所以那个 δλ 不是我编的",
     a4p:"通关画面上的 δλ 是<strong>从这 N 个光子的到达时间反推出来的</strong>：把它们的实际光程代进 C(Δν) 算出关联曲线，取半宽，就是这套散射体布局真正能达到的分辨率。换一种摆法，数字立刻跟着变。",
     a4p2:"你会发现「整齐阵列」几乎总是输给随手摆的一堆乱圆 —— 对称让大量光路退化成相同的长度，p(t) 塌成几根尖峰，分布不再铺开。<strong>混沌不是这个方案的副作用，它就是工作原理本身。</strong>",
-    aPaper:'这个游戏的灵感来自我们的论文 <a class="t" href="https://doi.org/10.1103/yffp-wgsh" target="_blank" rel="noopener">Resolution and Robustness Bounds for Reconstructive Spectrometers</a> —— C. Zhu, H. Lo, J. Yu, Q. J. Wang, Y. D. Chong, <i>Phys. Rev. Lett.</i> <b>137</b>, 123802 (2026)（<a href="https://arxiv.org/abs/2512.20415" target="_blank" rel="noopener">arXiv:2512.20415</a>）。论文问的正是被做成游戏规则的那件事：重建式光谱仪的分辨率究竟被什么限制住，又在什么条件下能被推得更远。',
+    aPaper:'这个游戏的灵感来自我们的论文 <a class="t" href="https://doi.org/10.1103/yffp-wgsh" target="_blank" rel="noopener">Resolution and Robustness Bounds for Reconstructive Spectrometers</a> —— C. Zhu, H. Lo, J. Yu, Q. J. Wang, Y. D. Chong, <i>Phys. Rev. Lett.</i> <b>137</b>, 123802 (2026)（<a href="https://arxiv.org/abs/2512.20415" target="_blank" rel="noopener">arXiv:2512.20415</a>）。',
+    aScope:'但边界要说清楚：这个游戏用到的理论只有谱关联函数 <b>C(Δν) = |FT{p(t)}|²</b> 这一层，它演示的是逆向设计如何改变<strong>光程差的分布</strong>，并没有实现论文真正的机制。论文处理的是更完整的问题 —— 重建误差由 Fisher 信息支配，其下界 <b>Tr[G⁺]</b> 可以分解成谱关联长度与平均透过率两部分，而这两者之间存在取舍。<strong>重建式光谱仪究竟该如何最优地设计，以论文为准；这个游戏只是它启发出来的一个直观侧面。</strong>',
     aContact:'如果你对这个项目感兴趣，欢迎来信：<a href="mailto:changyan.zhu@ntu.edu.sg">changyan.zhu@ntu.edu.sg</a>',
     aCopy:'© 2026 Changyan Zhu · 保留所有权利 · 以 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noopener">CC BY-NC-ND 4.0</a> 授权（署名 · 禁商用 · 禁改编），商用请来信洽谈。',
     intro:"摆放散射体，让光子在<b>每一个时间窗</b>都有到达 —— 探测器每一层对应一个时间窗，全部覆盖才算胜利。",
@@ -374,7 +387,8 @@
     a4h:"So that δλ is not a number I made up",
     a4p:"The δλ on the victory screen is <strong>inferred from those N arrival times</strong>: feed their actual path lengths into C(Δν), take the half-width of the resulting correlation curve, and that is the resolution this particular scatterer layout achieves. Rearrange the scatterers and the number moves with you.",
     a4p2:"You will find that “Regular array” almost always loses to a handful of circles dropped by hand — symmetry collapses many paths onto the same length, p(t) falls into a few spikes, and the spread is gone. <strong>Chaos is not a side effect of this scheme; it is the working principle.</strong>",
-    aPaper:'This game grew out of our paper <a class="t" href="https://doi.org/10.1103/yffp-wgsh" target="_blank" rel="noopener">Resolution and Robustness Bounds for Reconstructive Spectrometers</a> — C. Zhu, H. Lo, J. Yu, Q. J. Wang, Y. D. Chong, <i>Phys. Rev. Lett.</i> <b>137</b>, 123802 (2026) (<a href="https://arxiv.org/abs/2512.20415" target="_blank" rel="noopener">arXiv:2512.20415</a>). The paper asks exactly what the game turns into a rule: what sets the resolution of a reconstructive spectrometer, and when it can be pushed further.',
+    aPaper:'This game was inspired by our paper <a class="t" href="https://doi.org/10.1103/yffp-wgsh" target="_blank" rel="noopener">Resolution and Robustness Bounds for Reconstructive Spectrometers</a> — C. Zhu, H. Lo, J. Yu, Q. J. Wang, Y. D. Chong, <i>Phys. Rev. Lett.</i> <b>137</b>, 123802 (2026) (<a href="https://arxiv.org/abs/2512.20415" target="_blank" rel="noopener">arXiv:2512.20415</a>).',
+    aScope:'The boundary is worth stating plainly. The only theory this game uses is the spectral correlation <b>C(Δν) = |FT{p(t)}|²</b>, and what it demonstrates is how inverse design reshapes the <strong>distribution of optical path lengths</strong>. It does not implement the machinery of the paper, where the reconstruction error is governed by the Fisher information and its bound <b>Tr[G⁺]</b> decomposes into a spectral correlation length and a mean transmittance, two quantities that trade off against each other. <strong>For how a reconstructive spectrometer should actually be optimally designed, the paper is the authority; this game is one intuitive facet it inspired.</strong>',
     aContact:'If this project interests you, write to me: <a href="mailto:changyan.zhu@ntu.edu.sg">changyan.zhu@ntu.edu.sg</a>',
     aCopy:'© 2026 Changyan Zhu · All rights reserved · Released under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noopener">CC BY-NC-ND 4.0</a> (attribution · non-commercial · no derivatives). Write for commercial licensing.',
     intro:"Place scatterers so that photons arrive in <b>every time window</b> — each detector layer is one window, and you win only when all of them are covered.",
