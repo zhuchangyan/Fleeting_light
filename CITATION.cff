@@ -20,13 +20,12 @@ authors:
     given-names: Changyan
     email: changyan.zhu@ntu.edu.sg
     affiliation: "Nanyang Technological University, Singapore"
-    # TODO: 填上你的 ORCID，去掉行首的 # 即可
-    # orcid: "https://orcid.org/0000-0000-0000-0000"
+    orcid: "https://orcid.org/0000-0002-2826-8426"
 version: "1.0.0"
 date-released: "2026-09-24"
 license: CC-BY-NC-ND-4.0
 url: "https://www.changyanzhu.com"
-repository-code: "https://github.com/CHANGE-ME/fleeting-light"
+repository-code: "https://github.com/zhuchangyan/Fleeting_light"
 keywords:
   - reconstructive spectrometer
   - computational spectrometer

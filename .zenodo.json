@@ -5,7 +5,8 @@
   "creators": [
     {
       "name": "Zhu, Changyan",
-      "affiliation": "Nanyang Technological University, Singapore"
+      "affiliation": "Nanyang Technological University, Singapore",
+      "orcid": "0000-0002-2826-8426"
     }
   ],
   "license": "cc-by-nc-nd-4.0",
@@ -40,6 +41,12 @@
     {
       "identifier": "https://www.changyanzhu.com",
       "relation": "isIdenticalTo",
+      "resource_type": "software",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://github.com/zhuchangyan/Fleeting_light",
+      "relation": "isSupplementedBy",
       "resource_type": "software",
       "scheme": "url"
     }
