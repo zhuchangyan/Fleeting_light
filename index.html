@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<!--
+  散射体设计台 · Scatterer Design Bench
+  一台可玩的混沌重建式光谱仪 —— 摆放散射体，塑造光子的 dwell-time 分布。
+  A playable chaotic reconstructive spectrometer: place scatterers, shape the
+  photons' dwell-time distribution.
+
+  Copyright (c) 2026 Changyan Zhu <changyan.zhu@ntu.edu.sg>.  All rights reserved.
+  Licensed under CC BY-NC-ND 4.0 — https://creativecommons.org/licenses/by-nc-nd/4.0/
+  Share it with attribution; no commercial use and no derivative works without
+  written permission.  For commercial licensing, write to the address above.
+
+  Inspired by, and with its rules derived from:
+    C. Zhu, H. Lo, J. Yu, Q. J. Wang, and Y. D. Chong,
+    "Resolution and Robustness Bounds for Reconstructive Spectrometers,"
+    Phys. Rev. Lett. 137, 123802 (2026).  doi:10.1103/yffp-wgsh
+
+  Source & citable archive: https://github.com/<user>/scatterer-design-bench
+  Live: https://www.changyanzhu.com
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="摆放散射体，让光子在每一个时间窗都有到达 —— 一台可玩的混沌光谱仪。规则全部来自计算，不是调手感调出来的。">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="散射体设计台 · Scatterer Design Bench">
+<meta property="og:description" content="Place scatterers so photons arrive in every time window — a playable chaotic spectrometer whose rules all come from calculations, not from game balance.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.changyanzhu.com/">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%94%AC</text></svg>">
+<style>
+  html{color-scheme:dark}
+  body{margin:0}
+  img{max-width:100%}
+  [hidden]{display:none!important}
+</style>
+<title>散射体设计台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root{
+    --void:#0a0a0c;--panel:#101014;--rail:#15151a;
+    --wall:#33333d;--wall-lit:#4e4e5b;--grid:#1a1a20;
+    --ink:#e8e6e0;--ink-2:#a9a49a;--ink-3:#6e6a63;
+    --a:#e0a040;--b:#3aa8d8;--good:#5fd0a8;--warn:#c2483f;
+    --f-d:"Spectral",Georgia,serif;--f-m:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--void);color:var(--ink);font-family:var(--f-d);line-height:1.6}
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 20px 50px;display:flex;flex-direction:column;gap:14px}
+
+  header{display:flex;flex-direction:column;gap:6px}
+  .eyebrow{font-family:var(--f-m);font-size:11px;font-weight:500;letter-spacing:.17em;
+           text-transform:uppercase;color:var(--ink-3)}
+  h1{margin:0;font-size:clamp(26px,4.4vw,36px);font-weight:600;letter-spacing:-.015em;line-height:1.1}
+
+  /* 目标条 */
+  .goal{background:var(--panel);border:1px solid var(--wall);border-radius:3px;
+        padding:13px 15px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
+  .goal-txt{flex:1 1 300px;font-size:16px;color:var(--ink-2);min-width:0}
+  .goal-txt b{color:var(--ink);font-weight:600}
+  .goal-txt .dl{font-family:var(--f-m);color:var(--a);font-weight:600}
+  .levels{display:flex;gap:0}
+  .levels button{border-radius:0;padding:7px 12px;min-width:44px}
+  .levels button:first-child{border-radius:2px 0 0 2px}
+  .levels button:last-child{border-radius:0 2px 2px 0}
+  .levels button+button{border-left:0}
+  .levels button[aria-pressed="true"]{background:var(--grid);color:var(--a);
+        border-color:var(--wall-lit);position:relative;z-index:1}
+  .levels button.done::after{content:"✓";margin-left:5px;color:var(--good)}
+
+  .stage{display:grid;grid-template-columns:minmax(0,1.32fr) minmax(0,1fr);gap:13px;align-items:start}
+  @media(max-width:940px){.stage{grid-template-columns:minmax(0,1fr)}}
+
+  .screen{position:relative;background:var(--panel);border:1px solid var(--wall);
+          border-radius:3px;overflow:hidden}
+  #cav{display:block;width:100%;height:auto;cursor:crosshair;touch-action:none}
+
+  .panel{background:var(--panel);border:1px solid var(--wall);border-radius:3px;
+         padding:13px;display:flex;flex-direction:column;gap:10px}
+  .ptitle{font-family:var(--f-m);font-size:10.5px;font-weight:600;letter-spacing:.13em;
+          text-transform:uppercase;color:var(--ink-3)}
+  canvas.chart{display:block;width:100%;height:auto;background:var(--rail);
+               border:1px solid var(--grid);border-radius:2px}
+
+  .legend{display:flex;gap:16px;font-family:var(--f-m);font-size:11.5px;color:var(--ink-2)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:14px;height:3px;border-radius:2px;flex:none}
+
+  /* 区分度计 */
+  .score{display:flex;flex-direction:column;gap:7px}
+  .score-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .score-lab{font-family:var(--f-m);font-size:10.5px;letter-spacing:.11em;
+             text-transform:uppercase;color:var(--ink-3)}
+  .score-val{font-family:var(--f-m);font-size:30px;font-weight:600;line-height:1;
+             font-variant-numeric:tabular-nums}
+  .track{position:relative;height:9px;background:var(--grid);border-radius:5px;overflow:hidden}
+  .track i{display:block;height:100%;border-radius:5px;transition:width .12s linear}
+  .target{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink-2)}
+  .verdict{font-family:var(--f-m);font-size:12px;font-weight:500;letter-spacing:.04em}
+
+  .kpis{display:grid;grid-template-columns:1fr auto;gap:5px 10px;font-family:var(--f-m);font-size:11.5px}
+  .kpis dt{color:var(--ink-3)}
+  .kpis dd{margin:0;text-align:right;font-weight:500;font-variant-numeric:tabular-nums}
+  .g{color:var(--good)} .w{color:var(--warn)} .m{color:var(--ink)}
+
+  .statbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;
+           background:var(--panel);border:1px solid var(--wall);
+           border-radius:3px;padding:10px 13px}
+  button{font-family:var(--f-m);font-size:11.5px;font-weight:500;letter-spacing:.05em;
+         background:transparent;color:var(--ink-2);border:1px solid var(--wall);
+         border-radius:2px;padding:8px 12px;cursor:pointer;white-space:nowrap}
+  button:hover{color:var(--ink);border-color:var(--wall-lit)}
+  button.primary{background:var(--ink);color:var(--void);border-color:var(--ink)}
+  button.primary:hover{opacity:.87;color:var(--void)}
+  button:focus-visible{outline:2px solid var(--a);outline-offset:3px}
+  .hint{font-family:var(--f-m);font-size:11px;color:var(--ink-3);flex:1 1 220px;line-height:1.5}
+  .budget{font-family:var(--f-m);font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .budget b{color:var(--a);font-weight:600}
+  .sep{width:1px;height:20px;background:var(--wall)}
+  button.fire{font-size:15px;letter-spacing:.2em;padding:15px 10px;width:100%;
+    background:var(--a);border-color:var(--a);color:#1a1408;font-weight:600}
+  button.fire:hover{opacity:.9;color:#1a1408}
+  #bPlay,#bRand,#bGrid,#bClear,#bEval{width:100%}
+  #bBlind[aria-pressed="true"],#bPeek[aria-pressed="true"]{
+    background:var(--grid);color:var(--a);border-color:var(--wall-lit)}
+  .panel.blinded .score-val,.panel.blinded .track,.panel.blinded .verdict{
+    filter:blur(9px);opacity:.35;pointer-events:none;user-select:none}
+  .knobs{display:flex;flex-direction:column;gap:11px;margin-top:4px;
+         padding-top:11px;border-top:1px solid var(--grid)}
+  .knob{display:flex;flex-direction:column;gap:3px}
+  .knob-top{display:flex;justify-content:space-between;align-items:baseline;
+            font-family:var(--f-m);font-size:10.5px;letter-spacing:.09em;
+            text-transform:uppercase;color:var(--ink-3)}
+  .knob-top b{color:var(--a);font-weight:600;font-size:12px;
+              letter-spacing:0;text-transform:none;font-variant-numeric:tabular-nums}
+  .knob input[type=range]{width:100%;accent-color:var(--a);margin:0}
+
+  details{background:var(--panel);border:1px solid var(--wall);border-radius:3px;padding:0 13px}
+  summary{cursor:pointer;padding:11px 0;font-family:var(--f-m);font-size:11px;
+          letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸ ";color:var(--ink-3)}
+  details[open] summary::before{content:"▾ "}
+  summary:hover{color:var(--ink-2)}
+  .expert{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+          gap:14px;padding:0 0 14px}
+
+  .article{border-top:1px solid var(--wall);padding-top:26px;
+           display:flex;flex-direction:column;gap:4px}
+  .article h2{margin:0 0 4px;font-size:clamp(23px,3.4vw,30px);font-weight:600;
+              letter-spacing:-.01em;line-height:1.2}
+  .article .lead{margin:0 0 14px;color:var(--ink-2);font-size:16.5px;
+                 font-style:italic;max-width:64ch}
+  .asec{display:grid;grid-template-columns:minmax(0,15em) minmax(0,1fr);
+        gap:6px 30px;padding:15px 0;border-top:1px solid var(--grid)}
+  @media(max-width:760px){.asec{grid-template-columns:minmax(0,1fr);gap:6px}}
+  .asec h3{margin:0;font-family:var(--f-m);font-size:12px;font-weight:600;
+           letter-spacing:.06em;color:var(--a);line-height:1.5}
+  .asec p{margin:0 0 9px;color:var(--ink-2);font-size:15.5px;max-width:62ch;
+          grid-column:2}
+  @media(max-width:760px){.asec p{grid-column:1}}
+  .asec p:last-child{margin-bottom:0}
+  .asec strong{color:var(--ink);font-weight:600}
+  .acontact{margin-top:6px;padding:17px 0 4px;border-top:1px solid var(--grid)}
+  .acontact p{margin:0 0 7px;color:var(--ink-2);font-size:15.5px;max-width:62ch}
+  .acontact a{color:var(--a);text-decoration:none;border-bottom:1px solid var(--a)}
+  .acontact a:hover{color:var(--ink)}
+  .acontact .cite{padding-left:13px;border-left:2px solid var(--wall)}
+  .acontact .cite .t{color:var(--ink);font-style:italic}
+  .acontact .copy{margin:0;font-family:var(--f-m);font-size:12px;
+                  letter-spacing:.04em;color:var(--ink-3,#6e6a63)}
+  .asec sup{font-size:.72em}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow" data-i18n="eyebrow"></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><h1 data-i18n="title"></h1><button type="button" id="bLang" style="padding:6px 12px">EN</button></div>
+    <p class="intro" data-i18n-html="intro"></p>
+  </header>
+
+  <div class="goal">
+    <p class="goal-txt" id="goalTxt">—</p>
+    <div class="levels" id="levels"></div>
+  </div>
+
+  <div class="stage">
+    <div style="display:flex;flex-direction:column;gap:9px;min-width:0">
+      <div class="screen"><canvas id="cav" width="1200" height="720"></canvas></div>
+      <div class="statbar">
+        <span class="budget"><span data-i18n="scatterers"></span>
+          <b id="nUsed">0</b> / <span id="nMax">6</span></span>
+        <p class="hint" data-i18n-html="hint"></p>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:13px;min-width:0">
+
+      <div class="panel" style="gap:8px">
+        <button type="button" class="primary fire" id="bFire"></button>
+        <button type="button" id="bPlay"></button>
+        <div style="display:flex;gap:6px;margin-top:2px">
+          <button type="button" id="bBlind" style="flex:1"></button>
+          <button type="button" id="bPeek" style="flex:1"></button>
+        </div>
+        <div class="knobs" style="gap:6px">
+          <button type="button" id="bRand" data-i18n="random"></button>
+          <button type="button" id="bGrid" data-i18n="grid"></button>
+          <button type="button" id="bClear" data-i18n="clear"></button>
+          <button type="button" id="bEval" data-i18n="evaluate"></button>
+        </div>
+
+        <div class="knobs">
+          <div class="knob">
+            <div class="knob-top"><span data-i18n="speed"></span><b id="spV">1.0×</b></div>
+            <input type="range" id="spR" min="30" max="300" step="10" value="100">
+          </div>
+          <div class="knob">
+            <div class="knob-top"><span data-i18n="aperture"></span><b id="naV">62°</b></div>
+            <input type="range" id="naR" min="8" max="75" step="1" value="62">
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="scorePanel">
+        <div class="score">
+          <div class="score-top">
+            <span class="score-lab" data-i18n="layersCleared"></span>
+            <span class="score-val" id="mVal">—</span>
+          </div>
+          <div class="track"><i id="mBar"></i></div>
+          <div class="score-top" style="margin-top:7px">
+            <span class="score-lab" data-i18n="timeProgress"></span>
+            <span class="meter-val" id="hpVal" style="font-family:var(--f-m);
+                  font-size:13px;font-weight:500;font-variant-numeric:tabular-nums">—</span>
+          </div>
+          <div class="track" style="height:6px"><i id="hpBar"></i></div>
+          <div class="verdict" id="mVerd">—</div>
+        </div>
+        <dl class="kpis">
+          <dt data-i18n="achievedDl"></dt><dd id="sVal">—</dd>
+        </dl>
+        <span id="sBar" hidden></span><span id="sTgt" hidden></span><span id="sVerd" hidden></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ptitle" style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
+      <span data-i18n="dwellTitle"></span>
+      <span style="color:var(--ink-2);text-transform:none;letter-spacing:.04em;font-weight:500"
+            id="hCap"></span>
+    </div>
+    <canvas id="hist" class="chart" width="1180" height="300"></canvas>
+    <dl class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:4px 22px">
+      <div style="display:flex;justify-content:space-between;gap:10px">
+        <dt data-i18n="sigmaT"></dt><dd id="kSt">—</dd></div>
+      <div style="display:flex;justify-content:space-between;gap:10px">
+        <dt data-i18n="resTitle"></dt><dd id="kRes">—</dd></div>
+      <div style="display:flex;justify-content:space-between;gap:10px">
+        <dt data-i18n="tbTitle"></dt><dd id="kTB">—</dd></div>
+    </dl>
+  </div>
+
+
+
+  <article class="article">
+    <h2 data-i18n="aTitle"></h2>
+    <p class="lead" data-i18n="aLead"></p>
+    <section class="asec">
+      <h3 data-i18n="a1h"></h3>
+      <p data-i18n-html="a1p"></p>
+      <p data-i18n-html="a1p2"></p>
+    </section>
+    <section class="asec">
+      <h3 data-i18n="a2h"></h3>
+      <p data-i18n-html="a2p"></p>
+      <p data-i18n-html="a2p2"></p>
+    </section>
+    <section class="asec">
+      <h3 data-i18n="a3h"></h3>
+      <p data-i18n-html="a3p"></p>
+      <p data-i18n-html="a3p2"></p>
+    </section>
+    <section class="asec">
+      <h3 data-i18n="a4h"></h3>
+      <p data-i18n-html="a4p"></p>
+      <p data-i18n-html="a4p2"></p>
+    </section>
+    <footer class="acontact">
+      <p class="cite" data-i18n-html="aPaper"></p>
+      <p data-i18n-html="aContact"></p>
+      <p class="copy" data-i18n-html="aCopy"></p>
+    </footer>
+  </article>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= 双语 ================= */
+  var LANG="zh";
+  try{ var _l=localStorage.getItem("lang"); if(_l==="en"||_l==="zh") LANG=_l; }catch(e){}
+  var I18N={
+   zh:{
+    docTitle:"散射体设计台",
+    aTitle:"这个游戏在模拟什么",
+    aLead:"一句话：你是在用散射体的摆位，手动塑造光子的 dwell time 分布。",
+    a1h:"分辨率藏在光程里",
+    a1p:"重建式光谱仪不靠棱镜或光栅分光。它把光扔进一个乱七八糟的腔里，让不同波长自然走出不同的干涉图样，再由算法反推回光谱。",
+    a1p2:"两个相邻波长之所以能被区分，只因为它们沿同一条光路累积的相位差不同：<b>Δφ = 2πL·Δλ/λ²</b>。光程 <b>L</b> 越长，同样的 Δλ 被放大成越大的相位差。所以<strong>分辨率的来源是光程，不是光强</strong>。",
+    a2h:"要设计的其实是一条分布曲线",
+    a2p:"单独一条光路没有任何用 —— 它只贡献一个相位，测到的强度和波长无关。有用的是<strong>许多条长短不同的光路叠在一起</strong>。这些光路的长度（等价于光子在腔里逗留的时间）构成一个分布 <b>p(t)</b>，这就是 dwell time statistics。",
+    a2p2:"光谱关联函数正是它的傅里叶变换：<b>C(Δν) = |FT{p(t)}|²</b>。p(t) 铺得越开，C 就越窄，能分开的波长间隔 δλ 就越小。<strong>设计一台光谱仪，本质上就是在设计 p(t) 的形状。</strong>",
+    a3h:"游戏里每样东西对应什么",
+    a3p:"<strong>一个光子 = 对 p(t) 的一次抽样。</strong>关卡给你 N 个光子，就是只允许你用 N 个样本去描述这条分布。<strong>探测器的 N 层 = 把理想分布切成 N 个等概率区块</strong>，每层守着一个时间窗，窗宽就是那一块在时间轴上的跨度 —— 靠前的窗又窄又密，靠后的越来越宽，因为泄漏腔的理想分布是指数衰减的。",
+    a3p2:"<strong>剥掉一层 = 有光子恰好落进那个时间窗。</strong>某个窗口关闭时还没等到光子，说明你的经验分布在这一段是空的，任务当场失败。只有所有层都被剥掉，才说明这 N 个样本真的覆盖住了目标分布 —— 这就是通关条件。",
+    a4h:"所以那个 δλ 不是我编的",
+    a4p:"通关画面上的 δλ 是<strong>从这 N 个光子的到达时间反推出来的</strong>：把它们的实际光程代进 C(Δν) 算出关联曲线，取半宽，就是这套散射体布局真正能达到的分辨率。换一种摆法，数字立刻跟着变。",
+    a4p2:"你会发现「整齐阵列」几乎总是输给随手摆的一堆乱圆 —— 对称让大量光路退化成相同的长度，p(t) 塌成几根尖峰，分布不再铺开。<strong>混沌不是这个方案的副作用，它就是工作原理本身。</strong>",
+    aPaper:'这个游戏的灵感来自我们的论文 <a class="t" href="https://doi.org/10.1103/yffp-wgsh" target="_blank" rel="noopener">Resolution and Robustness Bounds for Reconstructive Spectrometers</a> —— C. Zhu, H. Lo, J. Yu, Q. J. Wang, Y. D. Chong, <i>Phys. Rev. Lett.</i> <b>137</b>, 123802 (2026)（<a href="https://arxiv.org/abs/2512.20415" target="_blank" rel="noopener">arXiv:2512.20415</a>）。论文问的正是被做成游戏规则的那件事：重建式光谱仪的分辨率究竟被什么限制住，又在什么条件下能被推得更远。',
+    aContact:'如果你对这个项目感兴趣，欢迎来信：<a href="mailto:changyan.zhu@ntu.edu.sg">changyan.zhu@ntu.edu.sg</a>',
+    aCopy:'© 2026 Changyan Zhu · 保留所有权利 · 以 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noopener">CC BY-NC-ND 4.0</a> 授权（署名 · 禁商用 · 禁改编），商用请来信洽谈。',
+    intro:"摆放散射体，让光子在<b>每一个时间窗</b>都有到达 —— 探测器每一层对应一个时间窗，全部覆盖才算胜利。",
+    congrats:"恭喜通关！", congratsSub:"所有时间窗都有光子抵达", eyebrow:"重建式光谱仪 · 逆向设计", title:"散射体设计台",
+    fire:"发射", refire:"重新发射", firing:"发射中…", pause:"暂停", play:"播放",
+    blind:"盲设计", peek:"预览光路",
+    speed:"速度", aperture:"入射孔径",
+    layersCleared:"已剥离层数", timeProgress:"时间进度", achievedDl:"该设计达到的 δλ",
+    dwellTitle:"光子到达时间 vs 目标分布",
+    sigmaT:"时间展宽 σ_t", resTitle:"分辨率 δλ（实测 C 半宽）", tbTitle:"δν · σ_t（漏腔理论 0.159）",
+    scatterers:"散射体", random:"随机布置", grid:"整齐阵列", clear:"清空", evaluate:"精确评估",
+    hint:'空白处<strong>点击</strong>放置 · <strong>拖动</strong>移动 · <strong>滚轮</strong>改半径 · <strong>Shift+点击</strong>删除',
+    inLabel:"入射", detLabel:"探测器", layersN:"{n} 层",
+    pressFire:"按「发射」射出光子", designFirst:"先摆好散射体，再发射", peekOn:"预览光路已开 · 摆好后发射", failBig:"任务失败",
+    failSub:"第 {n} 个时间窗没有光子抵达", retry:"改一改散射体，再发射一次",
+    idealDist:"理想分布 τ={t}mm", pathMm:"光程 mm", timePs:"时间 ps",
+    onePhoton:"只有 1 个光子 —— 没有时间展宽，谈不上分辨率",
+    sigmaCap:"σ = <b style=\"color:var(--a)\">{s}</b> mm · {n} 个光子抵达",
+    vWin:"✓ 任务成功 —— 到达时间匹配上了目标分布",
+    vLate:"FAILED · 晚到的 {n} 层没剥：光留不住",
+    vEarly:"FAILED · 早到的 {n} 层没剥：光跑得太快太齐",
+    vWeak:"FAILED · 光太弱，打不动",
+    vLeft:"FAILED · 还剩 {n} 层没剥掉",
+    inProg:"{n} 层进行中",
+    goal:'这一关只有 <span class="dl">{n} 个光子</span>，探测器也就 {n} 层。目标 dwell 分布被切成 {n} 个等概率块，每块对应一层 —— <b>必须有一个光子在那块的时间窗内抵达</b>，窗口一关还没剥掉就判负。分辨率不预设，<b>由这些光子最终的到达时间分布反推</b>。散射体上限 {m} 个。',
+    lvName:"{n} 光子",
+   },
+   en:{
+    docTitle:"Scatterer Design Bench",
+    aTitle:"What this game is simulating",
+    aLead:"In one line: by placing scatterers, you are shaping the photons\u2019 dwell-time distribution by hand.",
+    a1h:"Resolution lives in the path length",
+    a1p:"A reconstructive spectrometer does not disperse light with a prism or a grating. It throws light into a messy cavity, lets each wavelength come out with its own interference pattern, and has an algorithm invert that back into a spectrum.",
+    a1p2:"Two neighbouring wavelengths are distinguishable only because they accumulate different phase along the same path: <b>Δφ = 2πL·Δλ/λ²</b>. The longer the path <b>L</b>, the larger the phase difference a given Δλ is amplified into. <strong>Resolution comes from path length, not from intensity.</strong>",
+    a2h:"So what you design is a distribution",
+    a2p:"A single path is worthless — it contributes one phase, and the intensity you measure carries no wavelength information at all. What matters is <strong>many paths of many different lengths, superposed</strong>. Their lengths (equivalently, how long a photon lingers in the cavity) form a distribution <b>p(t)</b>: the dwell-time statistics.",
+    a2p2:"The spectral correlation is exactly its Fourier transform: <b>C(Δν) = |FT{p(t)}|²</b>. The wider p(t) spreads, the narrower C becomes, and the smaller the resolvable δλ. <strong>Designing a spectrometer is designing the shape of p(t).</strong>",
+    a3h:"What each game element maps to",
+    a3p:"<strong>One photon = one sample of p(t).</strong> A level hands you N photons, meaning you may describe the whole distribution with N samples only. <strong>The detector\u2019s N layers = the ideal distribution cut into N equal-probability blocks</strong>; each layer guards one time window, and the window\u2019s width is that block\u2019s span in time — narrow and crowded at the front, steadily wider towards the back, because a leaky cavity\u2019s ideal distribution decays exponentially.",
+    a3p2:"<strong>Stripping a layer = a photon landing inside that window.</strong> If a window closes with no photon in it, your empirical distribution has a hole there, and the run fails on the spot. Only when every layer is stripped have your N samples genuinely covered the target distribution — that is the win condition.",
+    a4h:"So that δλ is not a number I made up",
+    a4p:"The δλ on the victory screen is <strong>inferred from those N arrival times</strong>: feed their actual path lengths into C(Δν), take the half-width of the resulting correlation curve, and that is the resolution this particular scatterer layout achieves. Rearrange the scatterers and the number moves with you.",
+    a4p2:"You will find that “Regular array” almost always loses to a handful of circles dropped by hand — symmetry collapses many paths onto the same length, p(t) falls into a few spikes, and the spread is gone. <strong>Chaos is not a side effect of this scheme; it is the working principle.</strong>",
+    aPaper:'This game grew out of our paper <a class="t" href="https://doi.org/10.1103/yffp-wgsh" target="_blank" rel="noopener">Resolution and Robustness Bounds for Reconstructive Spectrometers</a> — C. Zhu, H. Lo, J. Yu, Q. J. Wang, Y. D. Chong, <i>Phys. Rev. Lett.</i> <b>137</b>, 123802 (2026) (<a href="https://arxiv.org/abs/2512.20415" target="_blank" rel="noopener">arXiv:2512.20415</a>). The paper asks exactly what the game turns into a rule: what sets the resolution of a reconstructive spectrometer, and when it can be pushed further.',
+    aContact:'If this project interests you, write to me: <a href="mailto:changyan.zhu@ntu.edu.sg">changyan.zhu@ntu.edu.sg</a>',
+    aCopy:'© 2026 Changyan Zhu · All rights reserved · Released under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noopener">CC BY-NC-ND 4.0</a> (attribution · non-commercial · no derivatives). Write for commercial licensing.',
+    intro:"Place scatterers so that photons arrive in <b>every time window</b> — each detector layer is one window, and you win only when all of them are covered.",
+    congrats:"CONGRATULATIONS!", congratsSub:"Every time window covered", eyebrow:"Reconstructive Spectrometer · Inverse Design", title:"Scatterer Design Bench",
+    fire:"FIRE", refire:"FIRE AGAIN", firing:"FIRING…", pause:"Pause", play:"Play",
+    blind:"Blind design", peek:"Preview paths",
+    speed:"Speed", aperture:"Input NA",
+    layersCleared:"Layers stripped", timeProgress:"Time progress", achievedDl:"Achieved δλ",
+    dwellTitle:"Photon arrival times vs target distribution",
+    sigmaT:"Time spread σ_t", resTitle:"Resolution δλ (measured HWHM of C)", tbTitle:"δν · σ_t (leaky-cavity theory 0.159)",
+    scatterers:"Scatterers", random:"Randomise", grid:"Regular array", clear:"Clear", evaluate:"Evaluate",
+    hint:'<strong>Click</strong> empty space to place · <strong>Drag</strong> to move · <strong>Scroll</strong> to resize · <strong>Shift+click</strong> to delete',
+    inLabel:"Input", detLabel:"Detector", layersN:"{n} layers",
+    pressFire:"Press FIRE to launch the photons", designFirst:"Place your scatterers first", peekOn:"Path preview on · fire when ready", failBig:"MISSION FAILED",
+    failSub:"No photon arrived in window {n}", retry:"Adjust the scatterers and fire again",
+    idealDist:"Target distribution τ={t}mm", pathMm:"path mm", timePs:"time ps",
+    onePhoton:"Only 1 photon — no time spread, so no resolution at all",
+    sigmaCap:"σ = <b style=\"color:var(--a)\">{s}</b> mm · {n} photons arrived",
+    vWin:"✓ Success — arrival times match the target distribution",
+    vLate:"FAILED · {n} late layer(s) left: light escapes too soon",
+    vEarly:"FAILED · {n} early layer(s) left: light is too fast and too uniform",
+    vWeak:"FAILED · light too weak to strip layers",
+    vLeft:"FAILED · {n} layer(s) still standing",
+    inProg:"{n} in progress",
+    goal:'This level gives you <span class="dl">{n} photons</span>, so the detector has {n} layers. The target dwell-time distribution is cut into {n} equal-probability blocks, one per layer — <b>a photon must arrive inside that block’s time window</b>, or the layer survives when the window closes. Resolution is not preset; it is <b>derived from these photons’ final arrival-time distribution</b>. Up to {m} scatterers.',
+    lvName:"{n} photons",
+   }
+  };
+  function T(k){ var s=I18N[LANG][k]; return s===undefined?k:s; }
+  function applyLang(){
+    var els=document.querySelectorAll("[data-i18n]"),i;
+    for(i=0;i<els.length;i++) els[i].textContent=T(els[i].getAttribute("data-i18n"));
+    els=document.querySelectorAll("[data-i18n-html]");
+    for(i=0;i<els.length;i++) els[i].innerHTML=T(els[i].getAttribute("data-i18n-html"));
+    document.documentElement.lang=(LANG==="en")?"en":"zh-CN";
+    document.title=T("docTitle");
+    $("bLang").textContent=(LANG==="zh")?"EN":"中";
+    $("bFire").textContent=finished?T("refire"):(launched?T("firing"):T("fire"));
+    $("bPlay").textContent=playing?T("pause"):T("play");
+    $("bBlind").textContent=T("blind");
+    $("bPeek").textContent=T("peek");
+    renderLevels();updGoal();retrace();
+  }
+
+  /* ================= 物理 ================= */
+  var W=2.0,H=1.2,IN_Y=0.0,OUT_LO=-1.2,OUT_HI=1.2;   // 出口=整面右壁
+  var REFL=0.985,MAXB=220,DEAD=0.04,LAM=550e-9;
+  var NCH=48, PHOTONS=8000, MREAL=24;
+  var NA=62;   // 入射半角（度）—— 光源数值孔径，路径系综的唯一来源
+
+  // 关卡就是光子数。分辨率不预设，从最终到达时间分布反推出来。
+  var TAU=12.0;                       // 目标 dwell 分布的均值(光程 mm)，固定
+  var LEVELS=[];
+  for(var _n=2;_n<=8;_n++) LEVELS.push({n:_n,max:Math.min(10,4+_n)});
+
+  /* ---- 探测器 = NPKT 层 ----
+     有几个波包，探测器就有几层。理想 dwell 分布按等概率切成 NPKT 块，
+     每块对应一层：必须有一个波包在那一块的时间窗内抵达，才能剥掉它。
+     于是「剥光所有层」= 这几个波包的到达时间构成目标分布的合格分层样本。 */
+  var LMIN=4.0, AMIN=0.30, LMAX=75.0, TRUNC=0.97;
+  var bars=[], barsLeft=0;
+
+  function buildBars(){
+    var tau=TAU, N=LEVELS[lv].n;
+    var G=function(u){ return -(1-u)*Math.log(1-u)+(1-u); };   // ∫ln(1-u)du
+    bars=[];
+    for(var k=0;k<N;k++){
+      var ua=k/N*TRUNC, ub=(k+1)/N*TRUNC;
+      bars.push({
+        a:   LMIN-tau*Math.log(1-ua),
+        b:   LMIN-tau*Math.log(1-ub),
+        mean:LMIN-tau*(G(ub)-G(ua))/(ub-ua),
+        hit:false, hitAt:0, fx:false, pk:-1
+      });
+    }
+  }
+
+  // 贪心匹配：每个波包最多剥一层
+  function resolveBars(D){
+    buildBars();
+    if(!D){ barsLeft=bars.length; return barsLeft; }
+    var used=[],i;
+    for(i=0;i<D.L.length;i++) used.push(false);
+    var left=0;
+    for(var k=0;k<bars.length;k++){
+      var B=bars[k];
+      for(i=0;i<D.L.length;i++){
+        if(used[i]||D.A[i]<AMIN) continue;
+        if(D.L[i]<B.a||D.L[i]>=B.b) continue;
+        used[i]=true; B.hit=true; B.hitAt=D.L[i]; B.pk=i; break;
+      }
+      if(!B.hit) left++;
+    }
+    barsLeft=left;
+    return left;
+  }
+
+  // 从这 N 个光子的到达时间反推分辨率：C(Δν) 的半宽
+  function achievedPm(D){
+    if(!D||D.L.length<2) return NaN;
+    var sw=0,i;
+    for(i=0;i<D.A.length;i++) sw+=D.A[i]*D.A[i];
+    if(sw<=0) return NaN;
+    var FN=900, FMAX=60e-12;
+    for(var q=1;q<FN;q++){
+      var kf=2*Math.PI*(FMAX*q/(FN-1))/(LAM*LAM)*1e-3, re=0, im=0;
+      for(i=0;i<D.L.length;i++){
+        var w=D.A[i]*D.A[i]/sw, ph=kf*D.L[i];
+        re+=w*Math.cos(ph); im+=w*Math.sin(ph);
+      }
+      if(re*re+im*im<0.5) return FMAX*q/(FN-1)*1e12;
+    }
+    return NaN;
+  }
+  var achieved=NaN;
+  // 这 N 个光子的振幅加权光程展宽
+  function sigmaOf(D){
+    if(!D||D.L.length<2) return NaN;
+    var sw=0,i;
+    for(i=0;i<D.A.length;i++) sw+=D.A[i]*D.A[i];
+    if(sw<=0) return NaN;
+    var mean=0;
+    for(i=0;i<D.L.length;i++) mean+=D.L[i]*D.A[i]*D.A[i]/sw;
+    var v=0;
+    for(i=0;i<D.L.length;i++) v+=D.A[i]*D.A[i]/sw*(D.L[i]-mean)*(D.L[i]-mean);
+    return Math.sqrt(v);
+  }
+
+  function barState(B){
+    if(B.hit&&animS>=B.hitAt) return "cleared";
+    if(animS>=B.b) return "failed";
+    if(animS>=B.a) return "live";
+    return "waiting";
+  }
+
+  var lv=0, cleared=[false,false,false,false];
+  var circles=[];
+
+  function shoot(ang,keep){
+    var x=-W+1e-9,y=IN_Y,dx=Math.cos(ang),dy=Math.sin(ang);
+    var L=0,amp=1,pts=keep?[[x,y]]:null;
+    for(var b=0;b<MAXB;b++){
+      var bt=1e18,kind=null,dat=null;
+      var wl=[[-W,0],[W,0],[-H,1],[H,1]];
+      for(var i=0;i<4;i++){
+        var val=wl[i][0],ax=wl[i][1],d=ax?dy:dx,p=ax?y:x;
+        if(Math.abs(d)<1e-12) continue;
+        var t=(val-p)/d;
+        if(t>1e-9&&t<bt){bt=t;kind="w";dat=[ax,val];}
+      }
+      for(var c=0;c<circles.length;c++){
+        var s=circles[c],ox=x-s.x,oy=y-s.y;
+        var bb=ox*dx+oy*dy,c0=ox*ox+oy*oy-s.r*s.r,disc=bb*bb-c0;
+        if(disc<=0) continue;
+        var sq=Math.sqrt(disc),t1=-bb-sq,t2=-bb+sq;
+        if(t1>1e-9&&t1<bt){bt=t1;kind="c";dat=s;}
+        else if(t2>1e-9&&t2<bt){bt=t2;kind="c";dat=s;}
+      }
+      if(kind===null) break;
+      x+=bt*dx;y+=bt*dy;L+=bt;
+      if(pts) pts.push([x,y]);
+      if(kind==="w"){
+        if(dat[0]===0&&dat[1]>0&&y>=OUT_LO&&y<=OUT_HI)
+          return {L:L,A:amp,Y:y,pts:pts,out:true};
+        if(dat[0]===0) dx=-dx; else dy=-dy;
+      } else {
+        var nx=(x-dat.x)/dat.r,ny=(y-dat.y)/dat.r,dot=dx*nx+dy*ny;
+        dx-=2*dot*nx; dy-=2*dot*ny;
+        var ln=Math.hypot(dx,dy)||1; dx/=ln; dy/=ln;  // 混沌放大浮点误差，逐次归一
+      }
+      amp*=REFL;
+      if(amp<DEAD) break;
+    }
+    return {L:L,A:0,Y:0,pts:pts,out:false};
+  }
+
+
+  /* 探测器散斑：把出射光按落点分通道，相干叠加 */
+  function speckle(D,lam,noise,rnd){
+    var I=new Float64Array(NCH),re=new Float64Array(NCH),im=new Float64Array(NCH),i;
+    for(i=0;i<D.L.length;i++){
+      var ch=(D.Y[i]-OUT_LO)/(OUT_HI-OUT_LO)*NCH|0;
+      if(ch<0)ch=0; if(ch>=NCH)ch=NCH-1;
+      var ph=2*Math.PI*(D.L[i]*1e-3)/lam;
+      re[ch]+=D.A[i]*Math.cos(ph); im[ch]+=D.A[i]*Math.sin(ph);
+    }
+    var sum=0;
+    for(i=0;i<NCH;i++){ I[i]=re[i]*re[i]+im[i]*im[i]; sum+=I[i]; }
+    if(!noise||sum<=0) return I;
+    var e=0;
+    for(i=0;i<D.A.length;i++) e+=D.A[i]*D.A[i];
+    var nph=PHOTONS*e/D.n;                       // 吞吐加权的总光子数
+    for(i=0;i<NCH;i++){
+      var mu=nph*I[i]/sum;
+      I[i]=Math.max(0,mu+Math.sqrt(mu)*rnd());   // 散粒噪声
+    }
+    return I;
+  }
+
+
+  // 可重复的伪随机（拖动时画面不乱跳）
+
+
+  /* 专家读数：解析式光谱关联 */
+  var NDL=180,DLMAX=150e-12;
+  function analyse(D){
+    var m={sd:NaN,mean:NaN,res:NaN};
+    if(!D||D.L.length<2) return m;
+    var sw=0,i;
+    for(i=0;i<D.A.length;i++) sw+=D.A[i]*D.A[i];
+    if(sw<=0) return m;
+    var mean=0;
+    for(i=0;i<D.L.length;i++) mean+=D.L[i]*D.A[i]*D.A[i]/sw;
+    var v=0;
+    for(i=0;i<D.L.length;i++) v+=D.A[i]*D.A[i]/sw*(D.L[i]-mean)*(D.L[i]-mean);
+    m.sd=Math.sqrt(v); m.mean=mean; m.res=achievedPm(D);
+    return m;
+  }
+
+  /* ================= 腔体绘制 + 动画 ================= */
+  var cv=document.getElementById("cav"),g=cv.getContext("2d"),PAD=32;
+  function sx(x){return PAD+(x+W)/(2*W)*(cv.width-2*PAD);}
+  function sy(y){return PAD+(H-y)/(2*H)*(cv.height-2*PAD);}
+  function kx(){return (cv.width-2*PAD)/(2*W);}
+  function inv(px,py){return [(px-PAD)/(cv.width-2*PAD)*2*W-W, H-(py-PAD)/(cv.height-2*PAD)*2*H];}
+
+  var visRays=[],NPKT=1,animS=0,paintedTo=0,maxTotal=0,playing=true;
+  var launched=false, finished=false, celebrated=false, winT=0, fwT=0, failIdx=-1;   // 未发射前腔内无光
+  var gameD=null;        // 画面上这 48 条光线 —— 判定只认它们
+
+  var SPEED=2.6,HEAD=14,speedMul=1.0;   // 1× = 2.6mm/s
+  var hcv=document.createElement("canvas");hcv.width=cv.width;hcv.height=cv.height;
+  var hg=hcv.getContext("2d");
+
+  function buildVis(n){
+    visRays=[];maxTotal=0;
+    var GL=[],GA=[],GY=[];
+    for(var k=0;k<n;k++){
+      var r=shoot((-NA+2*NA*k/(n-1))*Math.PI/180,true);
+      if(r.out){ GL.push(r.L);GA.push(r.A);GY.push(r.Y); }
+      if(!r.pts||r.pts.length<2) continue;
+      var cum=[0];
+      for(var i=1;i<r.pts.length;i++)
+        cum.push(cum[i-1]+Math.hypot(r.pts[i][0]-r.pts[i-1][0],r.pts[i][1]-r.pts[i-1][1]));
+      var tot=cum[cum.length-1];
+      if(tot>maxTotal) maxTotal=tot;
+      visRays.push({pts:r.pts,cum:cum,total:tot,out:r.out});
+    }
+    gameD={L:GL,A:GA,Y:GY,n:n};   // 判定数据就是画面上的这批光线
+    resetAnim();
+  }
+  function resetAnim(){
+    animS=0;paintedTo=0;fx.length=0;hurtFlash=0;
+    for(var bi=0;bi<bars.length;bi++) bars[bi].fx=false;
+    hg.setTransform(1,0,0,1,0,0);hg.clearRect(0,0,hcv.width,hcv.height);
+  }
+
+  /* 两个波长走同一条几何路径，差别只在相位。
+     Δφ = 2πL·Δλ/λ² —— 用它给光线着色，同色即代表两波长仍然同步。 */
+  // 两列波之间的 Δλ 就取「你这个设计能分辨的最小波长差」
+  function curDL(){ return (isFinite(achieved)?achieved:10)*1e-12; }
+
+  // 每个光子的固定身份色：预览、光迹、直方图竖线都用它
+  function pkHue(i){ return (28+i*(306/Math.max(1,NPKT)))%360; }
+  function pkCol(i,a){ return "hsla("+pkHue(i).toFixed(0)+",74%,62%,"+a+")"; }
+
+  /* 波包：两列波沿同一条路径传播。载波是示意性放大的
+     （真实 550nm 每毫米一千八百多个周期，画不出来），
+     但两列之间的滑移 Δφ = 2πL·Δλ/λ² 严格计算。 */
+  var PKT=2.5, CARRIER=0.55, AMPW=0.075;
+  function slip(s){ return 2*Math.PI*s*1e-3*curDL()/(LAM*LAM); }
+  function waveTrain(ctx,R,lo,hi,extraPhase,col,alpha,lw){
+    ctx.strokeStyle=col;ctx.globalAlpha=alpha;ctx.lineWidth=lw;
+    ctx.lineJoin="round";ctx.beginPath();
+    var first=true,step=0.022;
+    for(var s=lo;s<=hi;s+=step){
+      var pt=posAt(R,s),d=dirAt(R,s);
+      if(!pt||!d) break;
+      var u=(s-lo)/((hi-lo)||1), env=Math.sin(Math.PI*u);
+      var off=AMPW*env*Math.sin(2*Math.PI*s/CARRIER+extraPhase(s));
+      first?ctx.moveTo(sx(pt[0]-d[1]*off),sy(pt[1]+d[0]*off))
+           :ctx.lineTo(sx(pt[0]-d[1]*off),sy(pt[1]+d[0]*off));
+      first=false;
+    }
+    ctx.stroke();ctx.globalAlpha=1;
+  }
+
+  function feed(ctx,R,lo,hi){
+    var any=false;
+    for(var j=1;j<R.pts.length;j++){
+      var a=R.cum[j-1],b=R.cum[j];
+      if(b<=lo||a>=hi) continue;
+      var sp=(b-a)||1,f0=(Math.max(a,lo)-a)/sp,f1=(Math.min(b,hi)-a)/sp;
+      var p0=R.pts[j-1],p1=R.pts[j];
+      ctx.moveTo(sx(p0[0]+(p1[0]-p0[0])*f0),sy(p0[1]+(p1[1]-p0[1])*f0));
+      ctx.lineTo(sx(p0[0]+(p1[0]-p0[0])*f1),sy(p0[1]+(p1[1]-p0[1])*f1));
+      any=true;
+    }
+    return any;
+  }
+  function paintHistory(){
+    hg.globalCompositeOperation="lighter";
+    hg.lineWidth=1.2;hg.lineCap="round";
+    for(var i=0;i<visRays.length;i++){
+      var R=visRays[i];
+      hg.strokeStyle=R.out?pkCol(i,0.22):"rgba(122,118,110,0.07)";
+      hg.beginPath();
+      if(feed(hg,R,paintedTo,animS)) hg.stroke();
+    }
+    paintedTo=animS;
+  }
+  function posAt(R,s){
+    if(s>R.total) return null;
+    for(var j=1;j<R.pts.length;j++) if(R.cum[j]>=s){
+      var a=R.cum[j-1],sp=(R.cum[j]-a)||1,f=(s-a)/sp,p0=R.pts[j-1],p1=R.pts[j];
+      return [p0[0]+(p1[0]-p0[0])*f,p0[1]+(p1[1]-p0[1])*f];
+    }
+    return null;
+  }
+  function dirAt(R,s){
+    for(var j=1;j<R.pts.length;j++) if(R.cum[j]>=s){
+      var p0=R.pts[j-1],p1=R.pts[j];
+      var dx=p1[0]-p0[0],dy=p1[1]-p0[1],l=Math.hypot(dx,dy)||1;
+      return [dx/l,dy/l];
+    }
+    return null;
+  }
+
+  /* ---- 特效粒子（屏幕坐标） ---- */
+  var fx=[], hurtFlash=0;
+  function spawnFx(x,y,hue){
+    fx.push({x:x,y:y,life:0,max:0.16,flash:true});                 // 核心闪光
+    for(var i=0;i<30;i++){
+      var a=Math.random()*6.283,s=70+Math.random()*300;
+      fx.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,
+               life:0,max:0.38+Math.random()*0.50,hue:hue,
+               spark:Math.random()<0.45});
+    }
+    for(var k=0;k<8;k++){                                          // 碎块
+      var a2=Math.random()*6.283,s2=40+Math.random()*130;
+      fx.push({x:x,y:y,vx:Math.cos(a2)*s2,vy:Math.sin(a2)*s2,
+               life:0,max:0.55+Math.random()*0.35,hue:hue,
+               chunk:true,rot:Math.random()*6.283,
+               vr:(Math.random()-0.5)*14,sz:2.5+Math.random()*3.5});
+    }
+    fx.push({x:x,y:y,life:0,max:0.38,ring:true});
+    fx.push({x:x,y:y,life:0,max:0.66,ring:true,slow:true});
+  }
+  function spawnConfetti(n){
+    for(var i=0;i<n;i++){
+      var x=sx(-W)+Math.random()*(sx(W)-sx(-W));
+      fx.push({x:x,y:sy(H)-20,vx:(Math.random()-0.5)*70,vy:40+Math.random()*90,
+               life:0,max:2.2+Math.random()*1.4,hue:110+Math.random()*140,
+               conf:true,rot:Math.random()*6.283,vr:(Math.random()-0.5)*9,
+               sz:3+Math.random()*4});
+    }
+  }
+  function spawnCelebrate(){
+    for(var b=0;b<7;b++){
+      var ox=sx(-W)+Math.random()*(sx(W)-sx(-W)), oy=sy(-H)+Math.random()*(sy(H)-sy(-H));
+      var hue=140+Math.random()*80, d=b*0.12;
+      for(var i=0;i<22;i++){
+        var a=Math.random()*6.283, s=90+Math.random()*260;
+        fx.push({x:ox,y:oy,vx:Math.cos(a)*s,vy:Math.sin(a)*s,
+                 life:-d,max:0.7+Math.random()*0.5,hue:hue,
+                 spark:Math.random()<0.5});
+      }
+      fx.push({x:ox,y:oy,life:-d,max:0.55,ring:true});
+    }
+  }
+  function spawnAttack(x,y,hue){
+    fx.push({x:x,y:y,life:0,max:0.75,atk:true,hue:hue});
+    for(var i=0;i<10;i++){                                         // 向腔内喷出的恶意
+      var a=Math.PI+(Math.random()-0.5)*1.5,s=60+Math.random()*150;
+      fx.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,
+               life:0,max:0.5+Math.random()*0.3,hue:0,evil:true});
+    }
+    hurtFlash=1;
+  }
+  function stepFx(dt){
+    if(hurtFlash>0) hurtFlash=Math.max(0,hurtFlash-dt*2.2);
+    for(var i=fx.length-1;i>=0;i--){
+      var f=fx[i]; f.life+=dt;
+      if(f.life<0) continue;
+      if(f.life>=f.max){fx.splice(i,1);continue;}
+      if(f.conf){ f.x+=f.vx*dt; f.y+=f.vy*dt; f.vy+=150*dt; f.vx*=0.995; }
+      else if(f.vx!==undefined){ f.x+=f.vx*dt; f.y+=f.vy*dt; f.vx*=0.93; f.vy*=0.93; }
+      if(f.vr) f.rot+=f.vr*dt;
+    }
+  }
+  function drawFx(ctx){
+    ctx.save();ctx.globalCompositeOperation="lighter";
+    for(var i=0;i<fx.length;i++){
+      var f=fx[i]; if(f.life<0) continue;
+      var u=f.life/f.max,a=1-u;
+      if(f.flash){
+        var Rf=44*(1-Math.pow(a,3))+8;
+        var gr=ctx.createRadialGradient(f.x,f.y,0,f.x,f.y,Rf);
+        gr.addColorStop(0,"rgba(255,255,240,"+(a*0.95)+")");
+        gr.addColorStop(0.4,"rgba(150,255,210,"+(a*0.5)+")");
+        gr.addColorStop(1,"rgba(95,208,168,0)");
+        ctx.fillStyle=gr;ctx.beginPath();ctx.arc(f.x,f.y,Rf,0,6.284);ctx.fill();
+      } else if(f.ring){
+        var R=(f.slow?52:30)*u+5;
+        ctx.strokeStyle="rgba(95,208,168,"+(a*a*0.95)+")";
+        ctx.lineWidth=(f.slow?2:4.5)*a+0.4;
+        ctx.beginPath();ctx.arc(f.x,f.y,R,0,6.284);ctx.stroke();
+      } else if(f.atk){
+        var Ra=90*u+10;
+        ctx.strokeStyle="rgba(194,72,63,"+(a*a*0.85)+")";
+        ctx.lineWidth=5*a+0.6;
+        ctx.beginPath();ctx.arc(f.x,f.y,Ra,Math.PI*0.55,Math.PI*1.45);ctx.stroke();
+      } else if(f.conf){
+        ctx.save();ctx.translate(f.x,f.y);ctx.rotate(f.rot);
+        ctx.fillStyle="hsla("+f.hue+",85%,64%,"+Math.min(1,a*2.2)+")";
+        ctx.fillRect(-f.sz/2,-f.sz/2,f.sz,f.sz*1.7);
+        ctx.restore();
+      } else if(f.chunk){
+        ctx.save();ctx.translate(f.x,f.y);ctx.rotate(f.rot);
+        ctx.fillStyle="hsla("+f.hue+",70%,"+(48+20*a)+"%,"+(a*a)+")";
+        ctx.fillRect(-f.sz/2,-f.sz/2,f.sz,f.sz*0.7);
+        ctx.restore();
+      } else if(f.evil){
+        ctx.fillStyle="rgba(230,90,80,"+(a*a)+")";
+        ctx.beginPath();ctx.arc(f.x,f.y,3.2*a+0.6,0,6.284);ctx.fill();
+      } else {
+        var sz=(f.spark?1.6:3.0)*a+0.5;
+        ctx.fillStyle=f.spark?("rgba(255,248,220,"+(a*a)+")")
+                             :("hsla(158,85%,"+(60+20*a)+"%,"+(a*a)+")");
+        ctx.beginPath();ctx.arc(f.x,f.y,sz,0,6.284);ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  /* ---- 怪物形体 ---- */
+  function blobPath(ctx,cx,cy,R,M,tt){
+    ctx.beginPath();
+    var N=46;
+    for(var i=0;i<=N;i++){
+      var th=i/N*6.283185+M.spin*tt;
+      var rr=R*(1+M.a1*Math.sin(M.k1*th+M.p1+tt*1.7)
+                 +M.a2*Math.sin(M.k2*th+M.p2-tt*1.2));
+      var x=cx+Math.cos(th)*rr,y=cy+Math.sin(th)*rr;
+      i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+    }
+    ctx.closePath();
+  }
+  function drawMonster(ctx,cx,cy,M,tt,appear){
+    var R=M.size*appear;
+    // 触角
+    ctx.strokeStyle="hsla("+M.hue+",62%,52%,0.75)";ctx.lineWidth=1.3;
+    for(var k=0;k<M.horns;k++){
+      var th=Math.PI+(k-(M.horns-1)/2)*0.62+Math.sin(tt*2+k)*0.12;
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(th)*R*0.8,cy+Math.sin(th)*R*0.8);
+      ctx.lineTo(cx+Math.cos(th)*R*1.75,cy+Math.sin(th)*R*1.75);
+      ctx.stroke();
+    }
+    // 身体
+    blobPath(ctx,cx,cy,R,M,tt);
+    var g2=ctx.createRadialGradient(cx-R*0.3,cy-R*0.3,R*0.15,cx,cy,R*1.25);
+    g2.addColorStop(0,"hsla("+M.hue+",72%,58%,0.95)");
+    g2.addColorStop(1,"hsla("+M.hue+",68%,34%,0.92)");
+    ctx.fillStyle=g2;ctx.fill();
+    ctx.strokeStyle="hsla("+M.hue+",85%,72%,0.9)";ctx.lineWidth=1.3;ctx.stroke();
+    // 眼睛：朝着光来的方向（左）
+    var ex=cx-R*0.34,ey=cy-R*0.12,er=R*0.29;
+    for(var s=-1;s<=1;s+=2){
+      var px=ex,py=ey+s*R*0.34;
+      ctx.fillStyle="#f6f2ea";ctx.beginPath();ctx.arc(px,py,er,0,6.284);ctx.fill();
+      ctx.fillStyle="#1a0d10";
+      ctx.beginPath();ctx.arc(px-er*0.32,py,er*0.48,0,6.284);ctx.fill();
+    }
+  }
+
+  /* ---- 探测器绘制：竖向堆叠的 NPKT 层 ---- */
+  function drawBars(g){
+    if(!bars.length) return;
+    var N=bars.length, BX=sx(W);
+    var span=(OUT_HI-OUT_LO)*kx()*0.82;
+    var pitch=span/N, h=Math.max(7,Math.min(20,pitch-5));
+    var top=sy(0)-span/2;
+    var flick=0.76+0.24*Math.sin(animS*6.1);
+    for(var k=0;k<N;k++){
+      var B=bars[k], st=barState(B);
+      var y0=top+k*pitch+(pitch-h)/2;
+      if(st==="cleared"){
+        if(!B.fx){ spawnFx(BX-22,y0+h/2,168); B.fx=true; }
+        continue;
+      }
+      // 长度 ∝ 该块的时间窗宽度
+      var len=Math.min(190,26+(B.b-B.a)*6.5);
+      var x0=BX-7-len;
+      if(st==="failed"){
+        g.fillStyle="rgba(194,72,63,0.85)";g.fillRect(BX-7-28,y0,28,h);
+        g.strokeStyle="rgba(255,120,110,0.9)";g.lineWidth=1.5;
+        g.beginPath();g.moveTo(BX-7-len,y0+h/2);g.lineTo(BX-7,y0+h/2);g.stroke();
+        g.fillStyle="rgba(255,150,140,0.95)";
+        g.font="600 12px 'IBM Plex Mono',monospace";g.textAlign="right";
+        g.fillText("FAILED",BX-7-len-6,y0+h-1);
+        continue;
+      }
+      var live=(st==="live");
+      // 窗口推进时从左端收缩
+      var prog=live?Math.min(1,Math.max(0,(animS-B.a)/(B.b-B.a))):0;
+      var vis=len*(1-prog*0.7);
+      var seg=9,gap=2,n=Math.max(1,Math.round(vis/(seg+gap)));
+      for(var s=0;s<n;s++){
+        var x=BX-7-(s+1)*(seg+gap);
+        if(x<sx(-W)+4) break;
+        var a=live?flick*(0.45+0.55*(1-s/n)):0.22;
+        g.fillStyle="rgba(95,208,168,"+a+")";
+        g.fillRect(x,y0,seg,h);
+      }
+      if(live){
+        g.fillStyle="rgba(230,255,244,"+flick+")";
+        g.fillRect(BX-7-seg,y0,seg,h);
+      }
+      g.fillStyle=live?"rgba(232,230,224,0.62)":"rgba(140,136,128,0.45)";
+      g.font="500 12px 'IBM Plex Mono',monospace";g.textAlign="right";
+      g.fillText(B.mean.toFixed(0)+"mm",BX-7-vis-7,y0+h-1);
+    }
+    g.fillStyle="rgba(232,230,224,0.40)";
+    g.font="500 13px 'IBM Plex Mono',monospace";g.textAlign="right";
+    g.fillText(T("layersN").replace("{n}",N),BX-7,top-8);
+  }
+
+  function drawCav(){
+    g.setTransform(1,0,0,1,0,0);
+    g.fillStyle="#101014";g.fillRect(0,0,cv.width,cv.height);
+    g.save();g.globalCompositeOperation="lighter";
+    if(!launched&&peek){
+      // 预览：把每个光子的完整路径淡淡画出来，方便设计
+      g.lineWidth=1.4;
+      for(var pi=0;pi<visRays.length;pi++){
+        var PR=visRays[pi];
+        g.strokeStyle=PR.out?pkCol(pi,0.55):"rgba(122,118,110,0.16)";
+        g.beginPath();
+        g.moveTo(sx(PR.pts[0][0]),sy(PR.pts[0][1]));
+        for(var pj=1;pj<PR.pts.length;pj++) g.lineTo(sx(PR.pts[pj][0]),sy(PR.pts[pj][1]));
+        g.stroke();
+      }
+    }
+    if(launched){
+    g.drawImage(hcv,0,0);
+    for(var i=0;i<visRays.length;i++){
+      var R=visRays[i];
+      if(animS>R.total) continue;
+      // 两列波：琥珀 λ，蓝 λ+δλ，随光程逐渐错开
+      var lo=Math.max(0,animS-PKT), al=R.out?0.95:0.32;
+      waveTrain(g,R,lo,animS,function(){return 0;},"#e0a040",al,1.7);
+      waveTrain(g,R,lo,animS,slip,                 "#3aa8d8",al,1.7);
+    }
+    }
+    g.restore();
+
+    g.strokeStyle="#33333d";g.lineWidth=2;
+    g.strokeRect(sx(-W),sy(H),2*W*kx(),2*H*kx());
+    for(var c=0;c<circles.length;c++){
+      var s=circles[c];
+      g.beginPath();g.arc(sx(s.x),sy(s.y),s.r*kx(),0,6.284);
+      g.fillStyle="rgba(58,168,216,0.12)";g.fill();
+      g.strokeStyle=(hover===c||drag===c)?"#5fd0a8":"#3aa8d8";
+      g.lineWidth=(hover===c||drag===c)?2.4:1.6;g.stroke();
+    }
+    g.lineCap="round";g.lineWidth=5;
+    g.strokeStyle="#e0a040";
+    g.beginPath();g.moveTo(sx(-W),sy(IN_Y-0.1));g.lineTo(sx(-W),sy(IN_Y+0.1));g.stroke();
+    g.strokeStyle="#5fd0a8";
+    g.beginPath();g.moveTo(sx(W),sy(OUT_LO));g.lineTo(sx(W),sy(OUT_HI));g.stroke();
+
+    /* 怪物：到了它的时刻就冒出来 */
+    var MX=sx(W)-24;
+    drawBars(g);
+    drawFx(g);
+    if(hurtFlash>0){                                     // 受伤红晕
+      var vg=g.createRadialGradient(cv.width/2,cv.height/2,cv.height*0.25,
+                                    cv.width/2,cv.height/2,cv.width*0.62);
+      vg.addColorStop(0,"rgba(194,72,63,0)");
+      vg.addColorStop(1,"rgba(194,72,63,"+(hurtFlash*0.42)+")");
+      g.fillStyle=vg;g.fillRect(0,0,cv.width,cv.height);
+    }
+    g.font="500 16px 'IBM Plex Mono',monospace";g.fillStyle="#6e6a63";
+    g.textAlign="left";g.fillText(T("inLabel"),sx(-W)+10,sy(IN_Y)-13);
+    g.textAlign="right";g.fillText(T("detLabel"),sx(W)-10,sy(0)-13);
+
+    if(!launched){
+      g.textAlign="center";g.textBaseline="middle";
+      g.fillStyle="rgba(232,230,224,0.82)";
+      g.font="600 30px 'IBM Plex Mono',monospace";
+      if(peek) g.font="600 24px 'IBM Plex Mono',monospace";
+      g.fillText(T("pressFire"),cv.width/2,cv.height/2-12);
+      g.fillStyle="#6e6a63";g.font="500 17px 'IBM Plex Mono',monospace";
+      g.fillText(peek?T("peekOn"):T("designFirst"),cv.width/2,cv.height/2+20);
+      g.textBaseline="alphabetic";
+    } else if(finished){
+      var win=(barsLeft===0);
+      if(!celebrated){ celebrated=true; if(win){ spawnCelebrate(); spawnConfetti(70); } }
+      var cxm=cv.width/2, cym=cv.height/2;
+      if(win){
+        // 呼吸式径向光晕
+        var pulse=0.5+0.5*Math.sin(winT*2.4);
+        var rg=g.createRadialGradient(cxm,cym,20,cxm,cym,cv.width*0.55);
+        rg.addColorStop(0,"rgba(30,90,70,"+(0.55+0.12*pulse)+")");
+        rg.addColorStop(1,"rgba(8,20,16,0.88)");
+        g.fillStyle=rg;
+      } else {
+        g.fillStyle="rgba(26,8,8,0.72)";
+      }
+      g.fillRect(0,0,cv.width,cv.height);
+      g.textAlign="center";g.textBaseline="middle";
+
+      if(win){
+        // 入场：带过冲的缩放
+        var k=Math.min(1,winT/0.55);
+        var s=1+2.2*Math.pow(1-k,3)*Math.sin(k*9.0);
+        s=k<1?(0.3+0.7*k)*(1+0.35*Math.sin(k*Math.PI)):1;
+        g.save();
+        g.translate(cxm,cym-34);g.scale(s,s);
+        var grd=g.createLinearGradient(-320,0,320,0);
+        grd.addColorStop(0,"#5fd0a8"); grd.addColorStop(0.5,"#ffe6a8"); grd.addColorStop(1,"#5fd0a8");
+        g.shadowColor="rgba(95,208,168,"+(0.55+0.35*pulse)+")";
+        g.shadowBlur=34+18*pulse;
+        g.fillStyle=grd;
+        g.font="700 "+(cv.width>900?58:38)+"px 'IBM Plex Mono',monospace";
+        g.fillText(T("congrats"),0,0);
+        g.shadowBlur=0;
+        g.restore();
+
+        g.fillStyle="rgba(232,230,224,0.88)";
+        g.font="500 21px 'IBM Plex Mono',monospace";
+        g.fillText(T("congratsSub"),cxm,cym+22);
+        if(isFinite(achieved)){
+          g.fillStyle="#5fd0a8";
+          g.font="600 27px 'IBM Plex Mono',monospace";
+          g.fillText("δλ = "+achieved.toFixed(2)+" pm",cxm,cym+62);
+        }
+        // 星芒
+        g.save();g.globalCompositeOperation="lighter";
+        g.strokeStyle="rgba(255,230,168,"+(0.18+0.14*pulse)+")";g.lineWidth=2;
+        for(var r0=0;r0<12;r0++){
+          var a0=winT*0.5+r0*Math.PI/6, R0=130+30*pulse;
+          g.beginPath();
+          g.moveTo(cxm+Math.cos(a0)*R0,cym-34+Math.sin(a0)*R0*0.5);
+          g.lineTo(cxm+Math.cos(a0)*(R0+52),cym-34+Math.sin(a0)*(R0+52)*0.5);
+          g.stroke();
+        }
+        g.restore();
+      } else {
+        g.fillStyle="#e0645a";
+        g.font="700 "+(cv.width>900?50:34)+"px 'IBM Plex Mono',monospace";
+        g.fillText(T("failBig"),cxm,cym-26);
+        g.fillStyle="rgba(232,230,224,0.82)";
+        g.font="500 20px 'IBM Plex Mono',monospace";
+        g.fillText(T("failSub").replace("{n}",(failIdx>=0?failIdx+1:bars.length)),cxm,cym+18);
+      }
+      g.fillStyle="rgba(232,230,224,0.45)";
+      g.font="500 15px 'IBM Plex Mono',monospace";
+      g.fillText(T("retry"),cxm,cym+(win?106:60));
+      g.textBaseline="alphabetic";
+    }
+  }
+
+  /* ================= 图表 ================= */
+  function $(id){return document.getElementById(id);}
+  var hc=$("hist"),hgc=hc.getContext("2d");
+
+
+  /* 相量链：把落到某通道的所有路径的复振幅首尾相接画出来。
+     这正是干涉求和本身 —— 链条终点到原点的距离就是合振幅。 */
+
+
+
+  // 漏腔的 dwell time 近似指数分布，此时 C 为洛伦兹型，半宽 δν = 1/(2πτ)。
+  // 于是所需 σ_t = 1/(2π·δν)，换成光程：σ_L = λ²/(2π·Δλ)。
+  // （本模型实测 δν·σ_t ≈ 0.159 ≈ 1/2π，与此吻合。）
+  function sigTarget(){ return TAU; }
+
+  var CLIGHT=2.998e8;
+  function mm2ps(L){ return L*1e-3/CLIGHT*1e12; }   // 光程(mm) → 到达时间(ps)
+
+  function drawHist(D,m){
+    var w=hc.width,h=hc.height,padL=52,padR=18,padT=30,padB=42;
+    hgc.setTransform(1,0,0,1,0,0);hgc.clearRect(0,0,w,h);
+    var PW=w-padL-padR, PH=h-padT-padB;
+    if(!bars.length) return;
+    var XMAX=bars[bars.length-1].b*1.08;
+    var X=function(L){return padL+PW*Math.max(0,Math.min(1,L/XMAX));};
+
+    hgc.strokeStyle="#1a1a20";hgc.lineWidth=1;
+    for(var i=0;i<=4;i++){var gy=padT+PH*i/4;
+      hgc.beginPath();hgc.moveTo(padL,gy);hgc.lineTo(w-padR,gy);hgc.stroke();}
+
+    // 理想分布 p(t) ∝ exp(-(t-LMIN)/τ)
+    hgc.beginPath();hgc.moveTo(X(LMIN),padT+PH);
+    for(var q=0;q<=180;q++){
+      var L=LMIN+(XMAX-LMIN)*q/180;
+      var yv=Math.exp(-(L-LMIN)/TAU);
+      hgc.lineTo(X(L),padT+PH-PH*0.86*yv);
+    }
+    hgc.lineTo(X(XMAX),padT+PH);hgc.closePath();
+    hgc.fillStyle="rgba(224,160,64,0.13)";hgc.fill();
+    hgc.strokeStyle="rgba(224,160,64,0.55)";hgc.lineWidth=1.6;
+    hgc.beginPath();
+    for(q=0;q<=180;q++){
+      L=LMIN+(XMAX-LMIN)*q/180;
+      hgc.lineTo(X(L),padT+PH-PH*0.86*Math.exp(-(L-LMIN)/TAU));
+    }
+    hgc.stroke();
+
+    // 分块边界与每层的目标时刻
+    hgc.setLineDash([3,4]);hgc.lineWidth=1;
+    for(var k=0;k<bars.length;k++){
+      hgc.strokeStyle="rgba(169,164,154,0.30)";
+      hgc.beginPath();hgc.moveTo(X(bars[k].b),padT);hgc.lineTo(X(bars[k].b),padT+PH);hgc.stroke();
+      var st=barState(bars[k]);
+      hgc.fillStyle=st==="cleared"?"rgba(95,208,168,0.85)":
+                    (st==="failed"?"rgba(194,72,63,0.85)":"rgba(169,164,154,0.5)");
+      hgc.beginPath();hgc.arc(X(bars[k].mean),padT+PH+9,3.4,0,6.284);hgc.fill();
+    }
+    hgc.setLineDash([]);
+
+    // 这 N 个光子：各自一根竖线，高度 ∝ 能量
+    var used={};
+    for(k=0;k<bars.length;k++) if(bars[k].pk>=0) used[bars[k].pk]=true;
+    if(D&&D.L.length){
+      for(i=0;i<D.L.length;i++){
+        if(D.L[i]>animS&&launched) continue;
+        if(!launched) continue;
+        var e=D.A[i]*D.A[i], hh=PH*0.86*Math.max(0.06,e);
+        var col=used[i]?pkCol(i,0.95):"rgba(122,118,110,0.55)";
+        hgc.strokeStyle=col;hgc.lineWidth=2.2;
+        hgc.beginPath();hgc.moveTo(X(D.L[i]),padT+PH);hgc.lineTo(X(D.L[i]),padT+PH-hh);hgc.stroke();
+        hgc.fillStyle=col;
+        hgc.beginPath();hgc.arc(X(D.L[i]),padT+PH-hh,4,0,6.284);hgc.fill();
+      }
+    }
+
+    // 动画游标
+    if(launched&&animS<XMAX){
+      hgc.strokeStyle="rgba(232,230,224,0.45)";hgc.lineWidth=1.3;
+      hgc.beginPath();hgc.moveTo(X(animS),padT-4);hgc.lineTo(X(animS),padT+PH+3);hgc.stroke();
+    }
+
+    hgc.fillStyle="#6e6a63";hgc.font="500 12px 'IBM Plex Mono',monospace";
+    for(i=0;i<=4;i++){
+      var Lv=XMAX*i/4,xx=X(Lv);
+      hgc.textAlign="center";hgc.fillText(Lv.toFixed(0),xx,padT+PH+30);
+      hgc.fillStyle="#4e4e5b";hgc.fillText(mm2ps(Lv).toFixed(0),xx,padT+PH+42);
+      hgc.fillStyle="#6e6a63";
+    }
+    hgc.textAlign="left";
+    hgc.fillText(T("pathMm"),padL-46,padT+PH+30);
+    hgc.fillStyle="#4e4e5b";hgc.fillText(T("timePs"),padL-46,padT+PH+42);
+    hgc.fillStyle="rgba(224,160,64,0.75)";
+    hgc.font="500 12px 'IBM Plex Mono',monospace";hgc.textAlign="right";
+    hgc.fillText(T("idealDist").replace("{t}",TAU.toFixed(0)),w-padR,padT-8);
+  }
+
+  /* ================= 关卡与状态 ================= */
+  function renderLevels(){
+    var box=$("levels");box.innerHTML="";
+    LEVELS.forEach(function(L,i){
+      var b=document.createElement("button");
+      b.type="button";b.textContent=T("lvName").replace("{n}",L.n);
+      b.setAttribute("aria-pressed",i===lv?"true":"false");
+      if(cleared[i]) b.className="done";
+      b.addEventListener("click",function(){lv=i;circles=[];renderLevels();updGoal();retrace();});
+      box.appendChild(b);
+    });
+  }
+  function updGoal(){
+    var L=LEVELS[lv];
+    $("goalTxt").innerHTML=T("goal").replace(/\{n\}/g,L.n).replace("{m}",L.max);
+    $("nMax").textContent=L.max;
+  }
+
+  function refresh(D,m,left){
+    var N=bars.length, done=N-left, frac=N?done/N:0;
+    $("mVal").textContent=done+" / "+N;
+    $("mVal").className="score-val "+(left===0?"g":(frac>=0.75?"m":"w"));
+    $("mBar").style.width=(frac*100)+"%";
+    $("mBar").style.background=left===0?"var(--good)":(frac>=0.75?"var(--a)":"var(--warn)");
+
+    var e=0,i;
+    for(i=0;i<D.A.length;i++) e+=D.A[i]*D.A[i];
+    var nph=PHOTONS*e/D.n;
+
+    var lateMiss=0,earlyMiss=0;
+    for(i=0;i<N;i++) if(!bars[i].hit){ if(i>=N/2) lateMiss++; else earlyMiss++; }
+    if(left===0){
+      $("mVerd").innerHTML='<span class="g">'+T("vWin")+'</span>';
+      if(!cleared[lv]){cleared[lv]=true;renderLevels();}
+    } else if(lateMiss>earlyMiss){
+      $("mVerd").innerHTML='<span class="w">'+T("vLate").replace("{n}",lateMiss)+'</span>';
+    } else if(earlyMiss>lateMiss){
+      $("mVerd").innerHTML='<span class="w">'+T("vEarly").replace("{n}",earlyMiss)+'</span>';
+    } else if(nph<260){
+      $("mVerd").innerHTML='<span class="w">'+T("vWeak")+'</span>';
+    } else {
+      $("mVerd").innerHTML='<span class="w">'+T("vLeft").replace("{n}",left)+'</span>';
+    }
+    $("sVal").textContent=isFinite(achieved)?(achieved.toFixed(2)+" pm"):"—";
+    $("sVal").className=isFinite(achieved)?"g":"w";
+    var sg=sigmaOf(gameD);
+    if(isFinite(sg)&&sg>0){
+      $("hCap").innerHTML=T("sigmaCap").replace("{s}",sg.toFixed(1)).replace("{n}",gameD.L.length);
+      var st=mm2ps(sg);
+      $("kSt").textContent=st.toFixed(1)+" ps";
+      $("kSt").className="m";
+      if(isFinite(achieved)){
+        $("kRes").textContent=achieved.toFixed(2)+" pm";
+        $("kRes").className="g";
+        $("kTB").textContent=(achieved*1e-12*CLIGHT/(LAM*LAM)*st*1e-12).toFixed(3);
+      } else { $("kRes").textContent="—"; $("kRes").className="w"; $("kTB").textContent="—"; }
+    } else {
+      $("hCap").innerHTML=(gameD&&gameD.L.length===1)
+        ? T("onePhoton")
+        : '';
+      $("kSt").textContent="—"; $("kRes").textContent="—"; $("kTB").textContent="—";
+    }
+    $("nUsed").textContent=circles.length;
+  }
+
+  function retrace(){
+    if(typeof unfire==="function") unfire();   // 改了设计就要重新发射
+    NPKT=LEVELS[lv].n;
+    buildVis(NPKT);                            // 同时生成 gameD
+    var left=resolveBars(gameD);
+    achieved=achievedPm(gameD);
+    var m=analyse(gameD);
+    drawHist(gameD,m);
+    refresh(gameD,m,left);
+    $("nUsed").textContent=circles.length;
+    lastM=m;
+  }
+  var lastM=null;
+
+
+  /* ================= 交互 ================= */
+  var drag=-1,hover=-1,dragOff=[0,0];
+  function pick(mx,my){
+    for(var i=circles.length-1;i>=0;i--){
+      var s=circles[i];
+      if(Math.hypot(mx-s.x,my-s.y)<=s.r) return i;
+    }
+    return -1;
+  }
+  function local(e){
+    var r=cv.getBoundingClientRect();
+    return inv((e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height);
+  }
+  function clamp(s){
+    s.r=Math.max(0.07,Math.min(0.42,s.r));
+    s.x=Math.max(-W+s.r,Math.min(W-s.r,s.x));
+    s.y=Math.max(-H+s.r,Math.min(H-s.r,s.y));
+  }
+  cv.addEventListener("pointerdown",function(e){
+    var p=local(e),i=pick(p[0],p[1]);
+    if(e.shiftKey){ if(i>=0){circles.splice(i,1);retrace();} return; }
+    if(i>=0){drag=i;dragOff=[circles[i].x-p[0],circles[i].y-p[1]];cv.setPointerCapture(e.pointerId);}
+    else if(circles.length<LEVELS[lv].max){
+      circles.push({x:p[0],y:p[1],r:0.18});clamp(circles[circles.length-1]);retrace();
+    }
+  });
+  cv.addEventListener("pointermove",function(e){
+    var p=local(e);
+    if(drag>=0){
+      circles[drag].x=p[0]+dragOff[0];circles[drag].y=p[1]+dragOff[1];
+      clamp(circles[drag]); retrace();
+    } else {
+      var h=pick(p[0],p[1]);
+      if(h!==hover){hover=h;cv.style.cursor=h>=0?"grab":"crosshair";}
+    }
+  });
+  cv.addEventListener("pointerup",function(){if(drag>=0){drag=-1;retrace();}});
+  cv.addEventListener("pointercancel",function(){if(drag>=0){drag=-1;retrace();}});
+  cv.addEventListener("wheel",function(e){
+    var p=local(e),i=pick(p[0],p[1]);
+    if(i<0) return;
+    e.preventDefault();
+    circles[i].r*=e.deltaY<0?1.09:0.917;clamp(circles[i]);retrace();
+    clearTimeout(cv._w);cv._w=setTimeout(function(){retrace();},200);
+  },{passive:false});
+
+  $("bClear").addEventListener("click",function(){circles=[];retrace();});
+  $("bGrid").addEventListener("click",function(){
+    circles=[];
+    var mx=LEVELS[lv].max;
+    for(var i=0;i<4&&circles.length<mx;i++)
+      for(var j=0;j<3&&circles.length<mx;j++)
+        circles.push({x:-1.0+i*1.0,y:-0.6+j*0.6,r:0.20});
+    retrace();
+  });
+  $("bRand").addEventListener("click",function(){
+    circles=[];
+    var n=Math.min(LEVELS[lv].max,5+Math.floor(Math.random()*4));
+    for(var i=0;i<n;i++){
+      var s={x:(Math.random()*2-1)*(W-0.5),y:(Math.random()*2-1)*(H-0.5),
+             r:0.12+Math.random()*0.16};
+      clamp(s);circles.push(s);
+    }
+    retrace();
+  });
+  $("bEval").addEventListener("click",function(){retrace();});
+  function fire(){
+    launched=true;finished=false;celebrated=false;winT=0;fwT=0;failIdx=-1;playing=true;
+    $("bPlay").textContent=T("pause");$("bFire").textContent=T("firing");
+    resetAnim();
+  }
+  function unfire(){
+    launched=false;finished=false;celebrated=false;winT=0;fwT=0;failIdx=-1;
+    $("bFire").textContent=T("fire");
+    resetAnim();
+    for(var bj=0;bj<bars.length;bj++) bars[bj].fx=false;
+  }
+  $("bLang").addEventListener("click",function(){
+    LANG=(LANG==="zh")?"en":"zh";
+    try{localStorage.setItem("lang",LANG);}catch(e){}
+    applyLang();
+  });
+  $("bFire").addEventListener("click",function(){ fire(); });
+
+  var blind=true, peek=true;   // 默认：盲设计 + 预览光路
+  function syncToggle(id,on){
+    $(id).setAttribute("aria-pressed",on?"true":"false");
+  }
+  $("bBlind").addEventListener("click",function(){
+    blind=!blind; syncToggle("bBlind",blind);
+    $("scorePanel").classList.toggle("blinded",blind);
+  });
+  $("bPeek").addEventListener("click",function(){
+    peek=!peek; syncToggle("bPeek",peek);
+  });
+  syncToggle("bBlind",blind); syncToggle("bPeek",peek);
+  $("scorePanel").classList.toggle("blinded",blind);
+  $("bPlay").addEventListener("click",function(){
+    playing=!playing;this.textContent=playing?T("pause"):T("play");
+  });
+  $("naR").addEventListener("input",function(){
+    NA=parseInt(this.value,10);$("naV").textContent=NA+"°";retrace();
+  });
+  $("naR").addEventListener("change",function(){retrace();});
+  $("spR").addEventListener("input",function(){
+    speedMul=parseInt(this.value,10)/100;
+    $("spV").textContent=speedMul.toFixed(1)+"×";
+  });
+
+
+  // 下方色条：波包模式画两列错开的波，相位色模式画色环
+
+
+  /* ================= 主循环 ================= */
+  var lastT=0;
+  function loop(ts){
+    if(!lastT) lastT=ts;
+    var dt=Math.min(0.05,(ts-lastT)/1000);lastT=ts;
+    if(launched&&playing&&!finished&&visRays.length){
+      animS+=SPEED*speedMul*dt;
+      paintHistory();
+      // 最后一层被剥掉的瞬间就收工，不用等动画跑完
+      // 任一时间窗关闭时还没有光子抵达 —— 当场失败，不再往下跑
+      var allDone=bars.length>0;
+      for(var bi2=0;bi2<bars.length;bi2++){
+        var st2=barState(bars[bi2]);
+        if(st2!=="cleared") allDone=false;
+        if(st2==="failed"&&failIdx<0) failIdx=bi2;
+      }
+      if(allDone||failIdx>=0||animS>LMAX+6){
+        if(!allDone&&failIdx<0) animS=LMAX+6;
+        finished=true; $("bFire").textContent=T("refire");
+      }
+    }
+    if(finished&&barsLeft===0){
+      winT+=dt; fwT-=dt;
+      if(fwT<=0){ fwT=0.75; spawnCelebrate(); if(Math.random()<0.6) spawnConfetti(24); }
+    }
+    stepFx(dt);
+
+    drawCav();
+    var live=0,k2;
+    for(k2=0;k2<bars.length;k2++) if(barState(bars[k2])==="live") live++;
+    $("hpVal").textContent=launched?T("inProg").replace("{n}",live):("— / "+bars.length);
+    $("hpVal").className="m";
+    var endL=bars.length?bars[bars.length-1].b:LMAX;
+    var pf=launched?Math.min(1,Math.max(0,animS/endL)):0;
+    $("hpBar").style.width=(pf*100)+"%";
+    $("hpBar").style.background="var(--b)";
+    drawHist(gameD,lastM);   // 随动画游标逐个点亮
+    requestAnimationFrame(loop);
+  }
+
+  applyLang();
+  requestAnimationFrame(loop);
+})();
+</script>
+
+</body>
+</html>

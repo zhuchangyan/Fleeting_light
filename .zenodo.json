@@ -1,0 +1,48 @@
+{
+  "title": "Scatterer Design Bench: a playable chaotic reconstructive spectrometer",
+  "upload_type": "software",
+  "description": "<p><strong>Scatterer Design Bench</strong> (散射体设计台) is a single-file browser game about the physics of reconstructive spectrometers.</p><p>The player places circular scatterers inside a leaky rectangular cavity to shape the <em>dwell-time distribution</em> of a handful of photons. The correspondence to the physics is exact rather than decorative:</p><ul><li>one photon = one sample of the dwell-time distribution p(t);</li><li>the detector's N layers = the ideal distribution cut into N equal-probability blocks, each guarding one time window (narrow and crowded early, progressively wider later, because a leaky cavity's ideal distribution decays exponentially);</li><li>stripping a layer = a photon arriving inside that window; the run fails the moment a window closes empty, i.e. the empirical distribution has a hole;</li><li>the spectral resolution on the victory screen is not a preset target, but is inferred from the player's own arrival times via the spectral correlation C(&Delta;&nu;) = |FT{p(t)}|<sup>2</sup>.</li></ul><p>A consequence the game makes tangible: a regular array of scatterers almost always loses to a handful of circles dropped by hand, because symmetry collapses many optical paths onto the same length and p(t) falls into a few spikes. Chaos is not a side effect of the scheme; it is the working principle.</p><p>The model is derived from the bounds established in Phys. Rev. Lett. 137, 123802 (2026). Runs entirely client-side with no dependencies: open index.html in any modern browser. Bilingual interface (English / 中文).</p>",
+  "creators": [
+    {
+      "name": "Zhu, Changyan",
+      "affiliation": "Nanyang Technological University, Singapore"
+    }
+  ],
+  "license": "cc-by-nc-nd-4.0",
+  "access_right": "open",
+  "language": "eng",
+  "version": "1.0.0",
+  "keywords": [
+    "reconstructive spectrometer",
+    "computational spectrometer",
+    "chaotic cavity",
+    "speckle",
+    "dwell time statistics",
+    "spectral correlation",
+    "inverse design",
+    "physics education",
+    "science outreach",
+    "interactive simulation"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "10.1103/yffp-wgsh",
+      "relation": "isDerivedFrom",
+      "resource_type": "publication-article",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "arXiv:2512.20415",
+      "relation": "isDerivedFrom",
+      "resource_type": "publication-preprint",
+      "scheme": "arxiv"
+    },
+    {
+      "identifier": "https://www.changyanzhu.com",
+      "relation": "isIdenticalTo",
+      "resource_type": "software",
+      "scheme": "url"
+    }
+  ],
+  "notes": "Commercial use and derivative works require written permission: changyan.zhu@ntu.edu.sg"
+}

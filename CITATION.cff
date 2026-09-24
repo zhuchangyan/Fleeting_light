@@ -1,0 +1,59 @@
+cff-version: 1.2.0
+message: >-
+  If you use or refer to this game, please cite both the software (below) and
+  the paper its model is derived from (see `preferred-citation`).
+title: "Scatterer Design Bench: a playable chaotic reconstructive spectrometer"
+abstract: >-
+  A browser game in which the player places circular scatterers inside a leaky
+  rectangular cavity to shape the dwell-time distribution of a handful of
+  photons. Each photon is one sample of that distribution; the detector's N
+  layers are the ideal distribution cut into N equal-probability blocks, each
+  guarding one time window. A layer is stripped when a photon arrives inside
+  its window, and the run fails the moment a window closes empty. The spectral
+  resolution shown on the victory screen is not a preset difficulty target: it
+  is inferred from the players own arrival times through the spectral
+  correlation C(dnu) = |FT{p(t)}|^2. Every rule in the game is derived from the
+  physics rather than tuned for game feel.
+type: software
+authors:
+  - family-names: Zhu
+    given-names: Changyan
+    email: changyan.zhu@ntu.edu.sg
+    affiliation: "Nanyang Technological University, Singapore"
+    # TODO: 填上你的 ORCID，去掉行首的 # 即可
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+version: "1.0.0"
+date-released: "2026-09-24"
+license: CC-BY-NC-ND-4.0
+url: "https://www.changyanzhu.com"
+repository-code: "https://github.com/CHANGE-ME/scatterer-design-bench"
+keywords:
+  - reconstructive spectrometer
+  - computational spectrometer
+  - chaotic cavity
+  - speckle
+  - dwell time statistics
+  - spectral correlation
+  - inverse design
+  - physics education
+  - science outreach
+  - interactive simulation
+preferred-citation:
+  type: article
+  title: "Resolution and Robustness Bounds for Reconstructive Spectrometers"
+  authors:
+    - family-names: Zhu
+      given-names: Changyan
+    - family-names: Lo
+      given-names: Hsuan
+    - family-names: Yu
+      given-names: Jianbo
+    - family-names: Wang
+      given-names: Qi Jie
+    - family-names: Chong
+      given-names: Y. D.
+  journal: "Physical Review Letters"
+  volume: 137
+  number: "123802"
+  year: 2026
+  doi: "10.1103/yffp-wgsh"

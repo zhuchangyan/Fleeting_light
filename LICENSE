@@ -1,0 +1,59 @@
+Scatterer Design Bench / 散射体设计台
+Copyright (c) 2026 Changyan Zhu <changyan.zhu@ntu.edu.sg>
+All rights reserved.
+
+This work — including the HTML/CSS/JavaScript source, the physics model, the
+artwork, and all accompanying text in English and Chinese — is licensed under the
+
+    Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International
+    (CC BY-NC-ND 4.0)
+
+Full legal code: https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode
+A verbatim copy is included in this repository as LICENSE.cc-by-nc-nd-4.0.txt.
+
+-----------------------------------------------------------------------------
+In plain words
+-----------------------------------------------------------------------------
+
+You MAY:
+  - view, run, and study the source;
+  - copy and redistribute the work in any medium or format, unmodified,
+    provided you give appropriate credit, link to this licence, and indicate
+    that no changes were made;
+  - link to or embed the hosted version at https://www.changyanzhu.com ;
+  - use it in teaching and in non-commercial public outreach, with attribution.
+
+You MAY NOT, without prior written permission:
+  - use the work, or any part of it, for commercial purposes;
+  - distribute modified versions, translations, ports, or derivative games;
+  - remove or obscure the copyright notices or the attribution to the paper
+    the model is derived from.
+
+Attribution should read, at minimum:
+
+    "Scatterer Design Bench" by Changyan Zhu (https://www.changyanzhu.com),
+    licensed under CC BY-NC-ND 4.0.
+
+-----------------------------------------------------------------------------
+Commercial licensing
+-----------------------------------------------------------------------------
+
+Commercial use, derivative works, and bespoke or white-label versions are
+available under a separate licence. Write to changyan.zhu@ntu.edu.sg.
+
+-----------------------------------------------------------------------------
+What this licence does not cover
+-----------------------------------------------------------------------------
+
+Copyright protects this particular expression — this code, these words, this
+visual design. It does not protect the underlying physics, nor the general idea
+of representing dwell-time statistics as a game. Those are free for anyone to
+build on, and an independent implementation of the same concept does not
+infringe this licence.
+
+The scientific results the model is built on are published separately:
+
+    C. Zhu, H. Lo, J. Yu, Q. J. Wang, and Y. D. Chong,
+    "Resolution and Robustness Bounds for Reconstructive Spectrometers,"
+    Phys. Rev. Lett. 137, 123802 (2026).
+    https://doi.org/10.1103/yffp-wgsh   ·   arXiv:2512.20415
